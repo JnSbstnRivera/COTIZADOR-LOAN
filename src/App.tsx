@@ -1,0 +1,850 @@
+import React, { useState, useMemo, useEffect } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { 
+  Sun, 
+  Battery, 
+  Calculator, 
+  ShieldCheck, 
+  DollarSign,
+  Zap,
+  CheckCircle2,
+  TrendingUp,
+  FileText,
+  Phone,
+  CreditCard,
+  Building2,
+  ArrowRight,
+  Cloud,
+  LayoutGrid,
+  ChevronDown,
+  ChevronUp
+} from 'lucide-react';
+import { QuoteInputs } from './types';
+import { calculateQuote, pmt } from './utils/calculations';
+import { PANEL_PRICES, PANEL_WATTAGE, BATTERY_CAPACITY, WH_RATES, ORIENTAL_DESDE } from './constants';
+
+const LOGO_URL = "https://i.postimg.cc/44pJ0vXw/logo.png";
+const WH_LOGO_URL = "https://sales.p.whfinancial.digifi.io/api/branding/logo/b5c3e9d2-b49a-4b0b-8ab3-0486b316dfec-192c3bc4a390192c3bc4a3900010a8c898b-56363bd6-2be5-4f2c-9637-1f1fb609bd6a.jpg";
+const ORIENTAL_LOGO_URL = "https://orientalbank.com/themes/orientalbank/images/logo_oriental-bank.png";
+
+export default function App() {
+  const [showSplash, setShowSplash] = useState(true);
+  const [checkRotation, setCheckRotation] = useState(0);
+  const [inputs, setInputs] = useState<QuoteInputs>({
+    panels: 0,
+    batteries: 0,
+    extendedSolarWarranty: false,
+    extendedBatteryWarranty: false,
+    financing: 'WH',
+    manualPronto: 0,
+  });
+
+  useEffect(() => {
+    const timer = setTimeout(() => setShowSplash(false), 5500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const results = useMemo(() => calculateQuote(inputs), [inputs]);
+
+  const formatCurrency = (val: number) => 
+    new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val);
+
+  const formatNumber = (val: number) => 
+    new Intl.NumberFormat('en-US').format(val);
+
+  const formatPercent = (val: number) => 
+    `${(val * 100).toFixed(1)}%`;
+
+  const updateInput = (key: keyof QuoteInputs, value: any) => {
+    if (key === 'financing') {
+      setCheckRotation(prev => prev + 360);
+    }
+    setInputs(prev => ({ ...prev, [key]: value }));
+  };
+
+  return (
+    <div className="min-h-screen bg-[#f1f5f9] text-slate-900 font-sans selection:bg-blue-100 relative overflow-x-hidden">
+      {/* High-Impact Background Elements */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-blue-400/10 blur-[120px]" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-blue-300/10 blur-[120px]" />
+        <div className="absolute top-[20%] right-[10%] w-[30%] h-[30%] rounded-full bg-blue-500/5 blur-[100px]" />
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.02] mix-blend-multiply" />
+      </div>
+
+      <div className="relative z-10 max-w-7xl mx-auto">
+        <AnimatePresence>
+        {showSplash && (
+          <motion.div 
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1 }}
+            className="fixed inset-0 z-[100] bg-slate-800 flex flex-col items-center justify-center p-8 overflow-hidden"
+          >
+            {/* Cloudy Sky Background */}
+            <div className="absolute inset-0 bg-gradient-to-b from-slate-700 to-slate-900 opacity-50" />
+
+            {/* Icon Rain (Battery, Sun, DollarSign) */}
+            {[...Array(20)].map((_, i) => (
+              <motion.div
+                key={`rain-${i}`}
+                initial={{ y: -100, x: Math.random() * 100 + "%", opacity: 0 }}
+                animate={{ 
+                  y: 1200, 
+                  opacity: [0, 0.4, 0.4, 0],
+                  rotate: 360 
+                }}
+                transition={{ 
+                  duration: 4 + Math.random() * 4, 
+                  repeat: Infinity, 
+                  delay: Math.random() * 5,
+                  ease: "linear"
+                }}
+                className="absolute text-white/10 select-none pointer-events-none z-10"
+              >
+                {i % 3 === 0 ? <Battery className="w-6 h-6" /> : i % 3 === 1 ? <Sun className="w-6 h-6" /> : <DollarSign className="w-6 h-6" />}
+              </motion.div>
+            ))}
+
+            {/* Loan & Finance Particle Animation */}
+            {[...Array(30)].map((_, i) => {
+              const angle = Math.random() * Math.PI * 2;
+              const distance = 150 + Math.random() * 500;
+              const x = Math.cos(angle) * distance;
+              const y = Math.sin(angle) * distance;
+              
+              return (
+                <motion.div
+                  key={`particle-${i}`}
+                  initial={{ x: 0, y: 0, opacity: 0, scale: 0 }}
+                  animate={{ 
+                    x: x, 
+                    y: y, 
+                    opacity: [0, 0.5, 0.5, 0],
+                    scale: [0, 1, 1, 0],
+                    rotate: Math.random() * 360
+                  }}
+                  transition={{ 
+                    duration: 4 + Math.random() * 2,
+                    repeat: Infinity,
+                    delay: Math.random() * 2,
+                    ease: "easeOut"
+                  }}
+                  className="absolute select-none pointer-events-none z-10"
+                >
+                  {i % 3 === 0 ? (
+                    <DollarSign className="w-6 h-6 text-emerald-400/20" />
+                  ) : i % 3 === 1 ? (
+                    <TrendingUp className="w-6 h-6 text-blue-400/20" />
+                  ) : (
+                    <Calculator className="w-6 h-6 text-slate-400/20" />
+                  )}
+                </motion.div>
+              );
+            })}
+
+            {/* Sun Glow Effect (Behind Clouds) */}
+            <motion.div
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: [0, 1.2, 1], opacity: [0, 0.8, 0.5] }}
+              transition={{ delay: 0.8, duration: 2, ease: "easeOut" }}
+              className="absolute w-[600px] h-[600px] rounded-full bg-gradient-radial from-yellow-400/30 via-orange-500/10 to-transparent blur-[100px] z-0"
+            />
+
+            {/* Logo as Sun */}
+            <motion.div
+              initial={{ scale: 0.5, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              transition={{ delay: 1.5, duration: 1.5, ease: "backOut" }}
+              className="relative z-20"
+            >
+              <img 
+                src={LOGO_URL} 
+                alt="Windmar Home" 
+                className="w-64 md:w-96 drop-shadow-[0_0_50px_rgba(250,204,21,0.6)]"
+                referrerPolicy="no-referrer"
+              />
+            </motion.div>
+
+            {/* Geometric Assembly Reveal (Blueprint Style) */}
+            <div className="absolute inset-0 z-30 pointer-events-none overflow-hidden flex items-center justify-center bg-slate-950">
+              {/* Blueprint Grid Lines (Background) */}
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0.8 }}
+                transition={{ delay: 1.5, duration: 0.4 }}
+                className="absolute inset-0"
+                style={{
+                  backgroundImage: `linear-gradient(#94a3b8 1px, transparent 1px), linear-gradient(90deg, #94a3b8 1px, transparent 1px)`,
+                  backgroundSize: '40px 40px'
+                }}
+              />
+
+              {/* Drawing Lines (House/Solar Silhouette) */}
+              <svg 
+                viewBox="0 0 200 200" 
+                className="w-64 h-64 md:w-96 md:h-96 z-40"
+                fill="none" 
+                stroke="white" 
+                strokeWidth="1.2"
+              >
+                {/* House Outline */}
+                <motion.path
+                  d="M40,140 L40,80 L100,30 L160,80 L160,140 Z"
+                  initial={{ pathLength: 0, opacity: 0 }}
+                  animate={{ pathLength: 1, opacity: [0, 1, 0] }}
+                  transition={{ 
+                    duration: 1.5, 
+                    ease: "easeInOut",
+                    times: [0, 0.85, 1]
+                  }}
+                />
+                {/* Solar Panel Grid (6x3 Division) */}
+                <motion.path
+                  d="
+                    M60,80 L140,80 L140,140 L60,140 Z 
+                    M60,100 L140,100 M60,120 L140,120 
+                    M73.3,80 L73.3,140 M86.6,80 L86.6,140 M100,80 L100,140 M113.3,80 L113.3,140 M126.6,80 L126.6,140
+                  "
+                  initial={{ pathLength: 0, opacity: 0 }}
+                  animate={{ pathLength: 1, opacity: [0, 1, 0] }}
+                  transition={{ 
+                    delay: 0.3,
+                    duration: 1.2, 
+                    ease: "easeInOut",
+                    times: [0, 0.8, 1]
+                  }}
+                />
+              </svg>
+
+              {/* The Logo Reveal (Fusing from lines) */}
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0, filter: 'brightness(2) blur(10px)' }}
+                animate={{ scale: 1, opacity: 1, filter: 'brightness(1) blur(0px)' }}
+                transition={{ 
+                  delay: 1.6, 
+                  duration: 1, 
+                  ease: "easeOut" 
+                }}
+                className="absolute z-50"
+              >
+                <img 
+                  src={LOGO_URL} 
+                  alt="Windmar Home" 
+                  className="w-64 md:w-96 drop-shadow-[0_0_30px_rgba(255,255,255,0.4)]"
+                  referrerPolicy="no-referrer"
+                />
+              </motion.div>
+
+              {/* Background Clearing */}
+              <motion.div
+                initial={{ opacity: 1 }}
+                animate={{ opacity: 0 }}
+                transition={{ 
+                  delay: 4.8, 
+                  duration: 1, 
+                  ease: "easeInOut" 
+                }}
+                className="absolute inset-0 bg-slate-950 z-30"
+              />
+            </div>
+
+            {/* Bottom Text */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 4, duration: 1 }}
+              className="absolute bottom-20 z-40 text-center space-y-4"
+            >
+              <p className="text-xs font-black text-white/70 uppercase tracking-[0.4em]">
+                Iniciando Cotizador Profesional LOAN
+              </p>
+              <div className="w-64 h-1.5 bg-white/10 mx-auto rounded-full overflow-hidden border border-white/5">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: "100%" }}
+                  transition={{ delay: 0.5, duration: 3, ease: "linear" }}
+                  className="h-full bg-gradient-to-r from-yellow-500 via-yellow-400 to-orange-500"
+                />
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Top Section / Header Integrated */}
+      <div className="px-6 pt-6 pb-4 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="flex items-center gap-6">
+          <img src={LOGO_URL} alt="Windmar Home" className="h-16 md:h-24" referrerPolicy="no-referrer" />
+          <div className="hidden md:block h-10 w-px bg-wh-grey/20" />
+          <div className="hidden md:block">
+            <h1 className="text-2xl font-black tracking-tighter text-wh-black uppercase">
+              Cotizador Solar Loan
+            </h1>
+            <p className="text-[10px] font-bold uppercase tracking-[0.3em] transition-colors text-wh-blue">
+              Windmar Home Professional
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-4">
+          <div className="flex flex-col items-end">
+            <div className="flex items-center gap-2 transition-colors text-wh-blue">
+              <Phone className="w-4 h-4" />
+              <span className="text-lg font-black tracking-tighter">787-395-7766</span>
+            </div>
+            <p className="text-[9px] font-bold text-wh-grey uppercase tracking-widest">Línea Directa Windmar</p>
+          </div>
+        </div>
+      </div>
+
+      <main className="px-6 py-4 grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        {/* Left Column: Inputs */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="lg:col-span-5 space-y-6"
+        >
+          {/* Financing Selector - Visual Redesign */}
+          <section className="space-y-3">
+            <h3 className="text-[10px] font-black text-wh-grey uppercase tracking-[0.2em] ml-1">Institución Financiera</h3>
+            <div className="grid grid-cols-2 gap-3">
+              <button 
+                onClick={() => updateInput('financing', 'WH')}
+                className={`relative p-4 rounded-3xl border-2 transition-all text-left group ${
+                  inputs.financing === 'WH' 
+                    ? 'border-wh-blue bg-wh-blue/5 shadow-2xl shadow-wh-blue/40 z-20' 
+                    : 'border-slate-200 bg-white hover:border-slate-300 z-0'
+                }`}
+              >
+                <div className="flex flex-col gap-3 relative z-10">
+                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors overflow-hidden ${
+                    inputs.financing === 'WH' ? 'bg-white' : 'bg-slate-100'
+                  }`}>
+                    <img src={WH_LOGO_URL} alt="WH Financial" className="w-full h-full object-contain p-1" referrerPolicy="no-referrer" />
+                  </div>
+                  <div>
+                    <p className={`text-xs font-black uppercase tracking-tight ${
+                      inputs.financing === 'WH' ? 'text-wh-blue' : 'text-wh-black'
+                    }`}>WH Financial</p>
+                    <p className="text-[9px] font-bold text-wh-grey mt-0.5">Tasas fijas competitivas</p>
+                  </div>
+                </div>
+                {inputs.financing === 'WH' && (
+                  <motion.div 
+                    layoutId="active-fin" 
+                    animate={{ rotate: checkRotation }}
+                    transition={{ 
+                      layout: { duration: 0.8, ease: "easeInOut" },
+                      rotate: { duration: 0.8, ease: "easeInOut" }
+                    }}
+                    className="absolute top-3 right-3 z-50"
+                  >
+                    <CheckCircle2 className="w-5 h-5 text-yellow-400" />
+                  </motion.div>
+                )}
+              </button>
+
+              <button 
+                onClick={() => updateInput('financing', 'ORIENTAL')}
+                className={`relative p-4 rounded-3xl border-2 transition-all text-left group ${
+                  inputs.financing === 'ORIENTAL' 
+                    ? 'border-wh-orange bg-wh-orange/5 shadow-2xl shadow-wh-orange/40 z-20' 
+                    : 'border-slate-200 bg-white hover:border-slate-300 z-0'
+                }`}
+              >
+                <div className="flex flex-col gap-3 relative z-10">
+                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors overflow-hidden ${
+                    inputs.financing === 'ORIENTAL' ? 'bg-white' : 'bg-slate-100'
+                  }`}>
+                    <img src={ORIENTAL_LOGO_URL} alt="Oriental Bank" className="w-full h-full object-contain p-1" referrerPolicy="no-referrer" />
+                  </div>
+                  <div>
+                    <p className={`text-xs font-black uppercase tracking-tight ${
+                      inputs.financing === 'ORIENTAL' ? 'text-wh-orange' : 'text-wh-black'
+                    }`}>Oriental Bank</p>
+                    <p className="text-[9px] font-bold text-wh-grey mt-0.5">Opciones flexibles</p>
+                  </div>
+                </div>
+                {inputs.financing === 'ORIENTAL' && (
+                  <motion.div 
+                    layoutId="active-fin" 
+                    animate={{ rotate: checkRotation }}
+                    transition={{ 
+                      layout: { duration: 0.8, ease: "easeInOut" },
+                      rotate: { duration: 0.8, ease: "easeInOut" }
+                    }}
+                    className="absolute top-3 right-3 z-50"
+                  >
+                    <CheckCircle2 className="w-5 h-5 text-slate-300" />
+                  </motion.div>
+                )}
+              </button>
+            </div>
+          </section>
+
+          <section className="bg-white rounded-[2rem] border border-slate-200 p-6 shadow-xl shadow-slate-200/50 space-y-6">
+            {/* Combined Solar & Storage Row */}
+            <div className="grid grid-cols-2 gap-6">
+              {/* Solar Column */}
+              <div className="flex flex-col items-center space-y-4">
+                <motion.div 
+                  initial="initial"
+                  whileHover="hover"
+                  className="relative flex flex-col items-center justify-center pt-4"
+                >
+                  <motion.div
+                    variants={{
+                      initial: { y: 0, opacity: 0 },
+                      hover: { y: -50, opacity: 1 }
+                    }}
+                    transition={{ duration: 0.4, ease: "backOut" }}
+                    className="absolute text-[9px] font-black text-white uppercase tracking-widest whitespace-nowrap px-2 py-0.5 bg-wh-blue rounded-md shadow-lg shadow-wh-blue/20 z-20"
+                  >
+                    PLACAS QCELLS (410w)
+                  </motion.div>
+                  <div className="w-20 h-20 rounded-2xl flex items-center justify-center relative group/logo">
+                    {/* Corner accents */}
+                    <div className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-wh-orange/30 rounded-tl-lg" />
+                    <div className="absolute top-0 right-0 w-2 h-2 border-t-2 border-r-2 border-wh-orange/30 rounded-tr-lg" />
+                    <div className="absolute bottom-0 left-0 w-2 h-2 border-b-2 border-l-2 border-wh-orange/30 rounded-bl-lg" />
+                    <div className="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-wh-orange/30 rounded-br-lg" />
+                    
+                    <img 
+                      src="https://www.zonenco.nl/wp-content/uploads/2023/02/Website1024_4.png" 
+                      alt="QCELLS" 
+                      className="w-16 h-16 object-contain p-2 transition-transform duration-500 group-hover/logo:scale-110" 
+                      referrerPolicy="no-referrer" 
+                    />
+                  </div>
+                </motion.div>
+
+                <div className="w-full space-y-3">
+                  <InputGroup label="" className="relative z-30">
+                    <CustomSelect 
+                      value={inputs.panels}
+                      options={Object.keys(PANEL_PRICES).map(k => ({ value: Number(k), label: `${k} Placas` }))}
+                      onChange={(val) => updateInput('panels', val)}
+                    />
+                  </InputGroup>
+
+                  {inputs.panels > 0 && (
+                    <motion.div 
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="w-full p-1.5 bg-wh-blue/5 rounded-xl border border-wh-blue/10 text-center"
+                    >
+                      <p className="text-[8px] font-black text-wh-blue uppercase tracking-widest leading-none mb-0.5">Capacidad</p>
+                      <p className="text-[10px] font-black text-wh-black">
+                        {formatNumber(inputs.panels * PANEL_WATTAGE)}W
+                      </p>
+                    </motion.div>
+                  )}
+
+                  <Toggle 
+                    active={inputs.extendedSolarWarranty} 
+                    onClick={() => updateInput('extendedSolarWarranty', !inputs.extendedSolarWarranty)} 
+                    subtitle="($0.15/watt)"
+                  />
+                </div>
+              </div>
+
+              {/* Storage Column */}
+              <div className="flex flex-col items-center space-y-4">
+                <motion.div 
+                  initial="initial"
+                  whileHover="hover"
+                  className="relative flex flex-col items-center justify-center pt-4"
+                >
+                  <motion.div
+                    variants={{
+                      initial: { y: 0, opacity: 0 },
+                      hover: { y: -50, opacity: 1 }
+                    }}
+                    transition={{ duration: 0.4, ease: "backOut" }}
+                    className="absolute text-[9px] font-black text-white uppercase tracking-widest whitespace-nowrap px-2 py-0.5 bg-wh-orange rounded-md shadow-lg shadow-wh-orange/20 z-20"
+                  >
+                    TESLA POWER WALL
+                  </motion.div>
+                  <div className="w-20 h-20 rounded-2xl flex items-center justify-center relative group/logo">
+                    {/* Corner accents */}
+                    <div className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-wh-blue/30 rounded-tl-lg" />
+                    <div className="absolute top-0 right-0 w-2 h-2 border-t-2 border-r-2 border-wh-blue/30 rounded-tr-lg" />
+                    <div className="absolute bottom-0 left-0 w-2 h-2 border-b-2 border-l-2 border-wh-blue/30 rounded-bl-lg" />
+                    <div className="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-wh-blue/30 rounded-br-lg" />
+
+                    <img 
+                      src="https://cdn.pixabay.com/photo/2022/08/25/00/32/tesla-logo-7408969_1280.png" 
+                      alt="Tesla" 
+                      className="w-16 h-16 object-contain p-2 transition-transform duration-500 group-hover/logo:scale-110" 
+                      referrerPolicy="no-referrer" 
+                    />
+                  </div>
+                </motion.div>
+
+                <div className="w-full space-y-3">
+                  <InputGroup label="" className="relative z-30">
+                    <CustomSelect 
+                      value={inputs.batteries}
+                      options={[0, 1, 2, 3, 4].map(n => ({ value: n, label: n === 0 ? 'Sin Baterías' : `${n} Baterías` }))}
+                      onChange={(val) => updateInput('batteries', val)}
+                    />
+                  </InputGroup>
+
+                  {inputs.batteries > 0 && (
+                    <motion.div 
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="w-full p-1.5 bg-wh-blue/5 rounded-xl border border-wh-blue/10 text-center"
+                    >
+                      <p className="text-[8px] font-black text-wh-blue uppercase tracking-widest leading-none mb-0.5">Capacidad</p>
+                      <p className="text-[10px] font-black text-wh-black">
+                        {inputs.batteries * BATTERY_CAPACITY} kWh
+                      </p>
+                    </motion.div>
+                  )}
+
+                  <Toggle 
+                    active={inputs.extendedBatteryWarranty} 
+                    onClick={() => updateInput('extendedBatteryWarranty', !inputs.extendedBatteryWarranty)} 
+                    subtitle="($3k x bat)"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="h-px bg-slate-100" />
+
+            {/* Down Payment */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 border border-emerald-100">
+                  <DollarSign className="w-4 h-4" />
+                </div>
+                <h3 className="text-xs font-black text-wh-black uppercase tracking-tight">Inversión Inicial</h3>
+              </div>
+              
+              <InputGroup label="Pronto Pago ($)">
+                <input 
+                  type="number"
+                  value={inputs.manualPronto || ''}
+                  onChange={(e) => updateInput('manualPronto', Number(e.target.value))}
+                  className="w-full bg-transparent text-xs font-bold outline-none"
+                  placeholder="Ej: 5000"
+                />
+              </InputGroup>
+            </div>
+          </section>
+        </motion.div>
+
+        {/* Right Column: Results */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="lg:col-span-7 space-y-6"
+        >
+          {/* Monthly Payments */}
+          <section className="space-y-4">
+            <div className="flex items-center justify-between px-2">
+              <h3 className="text-[10px] font-black uppercase tracking-widest transition-colors text-wh-blue">Opciones de Mensualidad</h3>
+              <div className="flex items-center gap-2 text-[10px] font-bold transition-colors text-wh-blue">
+                <Building2 className="w-3.5 h-3.5" />
+                {inputs.financing === 'WH' ? 'WH Financial' : 'Oriental Bank'}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <AnimatePresence mode="popLayout">
+                {results.error ? (
+                  <motion.div 
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="col-span-full p-6 bg-amber-50 border border-amber-200 rounded-[2rem] flex flex-col items-center text-center space-y-3"
+                  >
+                    <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-600">
+                      <ShieldCheck className="w-6 h-6" />
+                    </div>
+                    <div className="space-y-1">
+                      <h4 className="text-base font-black text-amber-900 uppercase tracking-tight">Financiamiento No Disponible</h4>
+                      <p className="text-xs font-medium text-amber-800 max-w-md leading-relaxed">
+                        {results.error}
+                      </p>
+                    </div>
+                  </motion.div>
+                ) : (
+                  results.monthlyPayments.map((pay, idx) => (
+                    <motion.div
+                      key={`${pay.years}-${pay.label}-${idx}`}
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: idx * 0.05 }}
+                      className="bg-white border border-slate-200 rounded-[1.25rem] p-3 transition-all group cursor-default hover:border-wh-blue hover:shadow-xl hover:shadow-wh-blue/20"
+                    >
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          <div className="w-7 h-7 rounded-lg bg-slate-50 flex items-center justify-center transition-colors text-yellow-400 group-hover:bg-wh-blue group-hover:text-yellow-400">
+                            <Calculator className="w-3.5 h-3.5" />
+                          </div>
+                          <div>
+                            <p className="text-[10px] font-black text-wh-black">{pay.years} Años ({pay.years * 12} meses)</p>
+                            <p className="text-[8px] font-bold uppercase tracking-widest text-wh-blue">
+                              {pay.amountMax ? 'Rango Estimado' : (pay.label || 'Tasa Fija')}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-[8px] font-bold text-wh-grey uppercase">APR</p>
+                          <p className="text-[10px] font-black px-1 rounded text-wh-blue bg-yellow-400/20">
+                            {pay.amountMax 
+                              ? `${(pay.rate * 100).toFixed(2)}% - ${(pay.rateMax! * 100).toFixed(2)}%`
+                              : `${(pay.rate * 100).toFixed(2)}%`
+                            }
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-end justify-between">
+                        <div className="flex flex-col">
+                          <p className="text-xl font-black tracking-tight text-wh-black">
+                            {pay.amountMax 
+                              ? `${formatCurrency(pay.amount)} - ${formatCurrency(pay.amountMax)}`
+                              : formatCurrency(pay.amount)
+                            }
+                            <span className="text-[10px] font-medium text-wh-grey ml-1">/mes</span>
+                          </p>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))
+                )}
+              </AnimatePresence>
+            </div>
+          </section>
+
+          {/* Details Breakdown */}
+          <section className="bg-white rounded-[2rem] border border-slate-200 overflow-hidden">
+            <div className="py-3 px-6 border-b-2 flex items-center justify-between transition-colors border-wh-blue bg-wh-blue/5">
+              <h3 className="text-[12px] font-black uppercase tracking-[0.2em] text-wh-blue">Resumen del Proyecto</h3>
+              <FileText className="w-4 h-4 text-wh-blue" />
+            </div>
+            <div className="p-6 space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className={`space-y-3 transition-opacity ${results.error ? 'opacity-30' : ''}`}>
+                  <p className="text-[9px] font-black uppercase tracking-widest transition-colors text-wh-blue">Componentes</p>
+                  <div className="space-y-2">
+                    <DataRow label="Cantidad de Placas" value={`${inputs.panels} Placas`} financing="WH" />
+                    <DataRow label="Cantidad de Baterías" value={`${inputs.batteries} Baterías`} financing="WH" />
+                    <DataRow label="Capacidad Total" value={`${formatNumber(results.systemSize)}W`} financing="WH" />
+                    <DataRow label="Placas Fotovoltaicas" value={formatCurrency(results.solarValue)} totalValue={results.solarValue} financing="WH" />
+                    <DataRow label="Baterías Powerwall" value={formatCurrency(results.batteryValue)} totalValue={results.batteryValue} financing="WH" />
+                    <DataRow label="Garantías Extendidas" value={formatCurrency(results.solarWarrantyValue + results.batteryWarrantyValue)} financing="WH" />
+                  </div>
+                </div>
+                <div className={`space-y-3 transition-opacity ${results.error ? 'opacity-30' : ''}`}>
+                  <p className="text-[9px] font-black uppercase tracking-widest transition-colors text-wh-blue">Financiamiento</p>
+                  <div className="space-y-2">
+                    <DataRow label="Institución" value={inputs.financing === 'WH' ? 'WH Financial' : 'Oriental Bank'} financing="WH" />
+                    <DataRow label="Pronto Pago" value={`-${formatCurrency(inputs.manualPronto)}`} highlight financing="WH" />
+                    <DataRow label="Total a Financiar" value={formatCurrency(results.valorFinanciado)} highlight financing="WH" />
+                  </div>
+                </div>
+              </div>
+              {results.error && (
+                <div className="pt-3 border-t border-slate-100">
+                  <p className="text-[10px] font-bold text-amber-600 bg-amber-50 p-2 rounded-xl border border-amber-100 flex items-center gap-2">
+                    <ShieldCheck className="w-3.5 h-3.5" />
+                    {results.error}
+                  </p>
+                </div>
+              )}
+            </div>
+          </section>
+        </motion.div>
+      </main>
+
+      {/* Footer */}
+      <footer className="max-w-[1600px] mx-auto px-6 py-8 border-t border-slate-200 mt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-slate-400 text-[11px]">
+        <div className="flex items-center gap-4">
+          <img src={LOGO_URL} alt="Windmar Home" className="h-5 grayscale opacity-50" referrerPolicy="no-referrer" />
+          <p>© 2026 Windmar Home Support. Todos los derechos reservados.</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+          Estado del Sistema: Operacional
+        </div>
+      </footer>
+      </div>
+    </div>
+  );
+}
+
+function CustomSelect({ value, options, onChange, placeholder }: { value: number, options: { value: number, label: string }[], onChange: (val: number) => void, placeholder?: string }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const selectedOption = options.find(o => o.value === value);
+
+  return (
+    <div className="relative w-full">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center justify-between bg-transparent text-xs font-bold outline-none cursor-pointer text-wh-black"
+      >
+        <span className="truncate">{selectedOption ? selectedOption.label : placeholder}</span>
+        <ChevronDown className={`w-3.5 h-3.5 text-wh-grey transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <>
+            <div 
+              className="fixed inset-0 z-30" 
+              onClick={() => setIsOpen(false)} 
+            />
+            <motion.div
+              initial={{ opacity: 0, y: -10, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -10, scale: 0.95 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+              className="absolute left-0 right-0 top-full mt-2 bg-white border border-slate-200 rounded-2xl shadow-2xl shadow-wh-blue/20 z-50 max-h-48 overflow-y-auto py-2 scrollbar-hide"
+            >
+              {options.map((opt) => (
+                <button
+                  key={opt.value}
+                  onClick={() => {
+                    onChange(opt.value);
+                    setIsOpen(false);
+                  }}
+                  className={`w-full text-left px-4 py-2 text-xs font-bold transition-colors hover:bg-wh-blue/5 ${
+                    value === opt.value ? 'text-wh-blue bg-wh-blue/5' : 'text-wh-black'
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+function InputGroup({ label, children, className = "" }: { label: string, children: React.ReactNode, className?: string }) {
+  return (
+    <div className={`space-y-1.5 ${className}`}>
+      <label className="text-xs font-bold text-slate-600 ml-1">{label}</label>
+      <motion.div 
+        whileHover={{ scale: 1.02 }}
+        className="bg-white border border-slate-300 rounded-xl px-3 py-2.5 shadow-md focus-within:ring-4 focus-within:ring-blue-500/10 focus-within:border-blue-500 transition-all relative"
+      >
+        {children}
+      </motion.div>
+    </div>
+  );
+}
+
+function Toggle({ active, onClick, subtitle }: { active: boolean, onClick: () => void, subtitle?: string }) {
+  return (
+    <motion.div 
+      initial={false}
+      animate={{ 
+        backgroundColor: active ? 'rgba(0, 76, 151, 0.08)' : 'rgba(241, 245, 249, 0.5)',
+        borderColor: active ? 'rgba(0, 76, 151, 0.2)' : 'rgba(226, 232, 240, 1)'
+      }}
+      className="w-full p-2.5 rounded-xl border flex items-center justify-between transition-colors"
+    >
+      <div className="flex flex-col">
+        <span className="text-[10px] font-black text-wh-black uppercase tracking-tight">GARANTÍA EXTENDIDA</span>
+        <AnimatePresence>
+          {active && subtitle && (
+            <motion.span 
+              initial={{ opacity: 0, height: 0, y: -5 }}
+              animate={{ opacity: 1, height: 'auto', y: 0 }}
+              exit={{ opacity: 0, height: 0, y: -5 }}
+              className="text-[9px] font-black text-wh-blue italic leading-none mt-0.5 overflow-hidden"
+            >
+              {subtitle}
+            </motion.span>
+          )}
+        </AnimatePresence>
+      </div>
+      
+      <motion.button 
+        whileTap={{ scale: 0.9 }}
+        onClick={onClick}
+        className={`w-12 h-6 rounded-full relative transition-colors duration-500 overflow-hidden ${active ? 'bg-wh-blue' : 'bg-slate-200'}`}
+      >
+        <motion.div 
+          animate={{ 
+            x: active ? 26 : 4,
+            rotate: active ? 360 : 0
+          }}
+          transition={{ 
+            type: "spring", 
+            stiffness: 400, 
+            damping: 30,
+            rotate: { duration: 0.6, ease: "easeInOut" }
+          }}
+          className="absolute top-1 w-4 h-4 bg-white rounded-full shadow-lg flex items-center justify-center z-10"
+        >
+          {active ? (
+            <ShieldCheck className="w-3 h-3 text-wh-blue" />
+          ) : (
+            <div className="w-1.5 h-1.5 bg-slate-300 rounded-full" />
+          )}
+        </motion.div>
+      </motion.button>
+    </motion.div>
+  );
+}
+
+function DataRow({ label, value, highlight, muted, totalValue, financing }: { label: string, value: string, highlight?: boolean, muted?: boolean, totalValue?: number, financing?: 'WH' | 'ORIENTAL' }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const formatCurrency = (val: number) => 
+    new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val);
+
+  const baseValue = totalValue ? totalValue / 1.115 : 0;
+  const ivuValue = totalValue ? totalValue - baseValue : 0;
+
+  const labelColor = financing === 'WH' ? 'text-wh-blue' : 'text-wh-orange';
+  const accentColor = financing === 'WH' ? 'text-wh-blue' : 'text-wh-orange';
+  const hoverColor = financing === 'WH' ? 'hover:text-wh-blue' : 'hover:text-wh-orange';
+
+  return (
+    <div className={`space-y-1 ${muted ? 'opacity-30' : ''}`}>
+      <div className="flex items-center justify-between py-1">
+        <div className="flex items-center gap-1">
+          <span className={`text-sm font-medium ${labelColor}`}>{label}</span>
+          {totalValue !== undefined && (
+            <button 
+              onClick={() => setIsOpen(!isOpen)} 
+              className={`p-1 hover:bg-slate-50 rounded-md transition-colors ${hoverColor}`}
+            >
+              {isOpen ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+            </button>
+          )}
+        </div>
+        <span className={`text-sm font-bold ${highlight ? (financing === 'WH' ? 'text-wh-blue bg-yellow-400/20 px-2 rounded-lg' : accentColor) : 'text-wh-black'}`}>{value}</span>
+      </div>
+      <AnimatePresence>
+        {isOpen && totalValue !== undefined && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="overflow-hidden pl-4 space-y-1"
+          >
+            <div className={`flex justify-between text-[11px] font-bold italic ${accentColor}`}>
+              <span>Valor sin IVU</span>
+              <span>{formatCurrency(baseValue)}</span>
+            </div>
+            <div className={`flex justify-between text-[11px] font-bold italic ${accentColor}`}>
+              <span>IVU (11.5%)</span>
+              <span>{formatCurrency(ivuValue)}</span>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
