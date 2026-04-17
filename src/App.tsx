@@ -22,6 +22,8 @@ import {
 import { QuoteInputs } from './types';
 import { calculateQuote, pmt } from './utils/calculations';
 import { PANEL_PRICES, PANEL_WATTAGE, BATTERY_CAPACITY, WH_RATES, ORIENTAL_DESDE } from './constants';
+import { PDFModal, type ClienteData, type ConsultorData } from './components/PDFModal';
+import { generateLoanPDF } from './utils/generateLoanPDF';
 
 const LOGO_URL = "https://i.postimg.cc/44pJ0vXw/logo.png";
 const WH_LOGO_URL = "https://sales.p.whfinancial.digifi.io/api/branding/logo/b5c3e9d2-b49a-4b0b-8ab3-0486b316dfec-192c3bc4a390192c3bc4a3900010a8c898b-56363bd6-2be5-4f2c-9637-1f1fb609bd6a.jpg";
@@ -45,6 +47,21 @@ export default function App() {
   }, []);
 
   const results = useMemo(() => calculateQuote(inputs), [inputs]);
+  const [pdfModalAbierto, setPdfModalAbierto] = useState(false);
+
+  const loanResumen = {
+    paneles:       inputs.panels > 0 ? `${inputs.panels} x QCells Q PEAK DUO BLK ML-G10+ 410` : 'Sin Paneles',
+    baterias:      inputs.batteries > 0 ? `${inputs.batteries} x Tesla Powerwall 3` : 'Sin Baterias',
+    sistemaKW:     Number((inputs.panels * 410 / 1000).toFixed(2)),
+    financiera:    inputs.financing === 'WH' ? 'WH Financial' : 'Oriental Bank',
+    pronto:        inputs.manualPronto,
+    totalFinanciar: results.valorFinanciado,
+    pagos:         results.monthlyPayments,
+  };
+
+  const handleGenerateLoanPDF = async (cliente: ClienteData, consultor: ConsultorData) => {
+    await generateLoanPDF(cliente, consultor, loanResumen);
+  };
 
   const formatCurrency = (val: number) => 
     new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val);
@@ -626,7 +643,18 @@ export default function App() {
           <section className="bg-white rounded-[2rem] border border-slate-200 overflow-hidden">
             <div className="py-3 px-6 border-b-2 flex items-center justify-between transition-colors border-wh-blue bg-wh-blue/5">
               <h3 className="text-[12px] font-black uppercase tracking-[0.2em] text-wh-blue">Resumen del Proyecto</h3>
-              <FileText className="w-4 h-4 text-wh-blue" />
+              <div className="flex items-center gap-3">
+                {!results.error && (
+                  <button
+                    onClick={() => setPdfModalAbierto(true)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#1a56c4] text-white text-[11px] font-bold hover:bg-[#0d2050] transition-colors"
+                  >
+                    <FileText className="w-3.5 h-3.5" />
+                    Descargar PDF
+                  </button>
+                )}
+                <FileText className="w-4 h-4 text-wh-blue" />
+              </div>
             </div>
             <div className="p-6 space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -662,6 +690,21 @@ export default function App() {
           </section>
         </motion.div>
       </main>
+
+      <PDFModal
+        isOpen={pdfModalAbierto}
+        onClose={() => setPdfModalAbierto(false)}
+        tipo="loan"
+        resumen={{
+          'Paneles':          loanResumen.paneles,
+          'Baterias':         loanResumen.baterias,
+          'Sistema':          `${loanResumen.sistemaKW} KW`,
+          'Financiera':       loanResumen.financiera,
+          'Pronto Pago':      `$${loanResumen.pronto.toLocaleString()}`,
+          'Total a Financiar': `$${loanResumen.totalFinanciar.toLocaleString()}`,
+        }}
+        onGenerate={handleGenerateLoanPDF}
+      />
 
       {/* Footer */}
       <footer className="max-w-[1600px] mx-auto px-6 py-8 border-t border-slate-200 mt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-slate-400 text-[11px]">
