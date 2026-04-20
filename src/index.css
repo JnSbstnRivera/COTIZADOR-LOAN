@@ -20,6 +20,11 @@
   --color-text-muted: #6D6E71;
 }
 
+/* Dark mode token overrides */
+.dark {
+  --color-wh-blue: #60a5fa;
+}
+
 @layer base {
   body {
     @apply antialiased bg-bg dark:bg-[#0f1215] text-text-main dark:text-[#e8eaed] min-h-screen relative overflow-x-hidden;

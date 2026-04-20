@@ -42,7 +42,7 @@ export default function App() {
   });
 
   useEffect(() => {
-    const timer = setTimeout(() => setShowSplash(false), 5500);
+    const timer = setTimeout(() => setShowSplash(false), 3500);
     return () => clearTimeout(timer);
   }, []);
 
@@ -105,196 +105,88 @@ export default function App() {
       <div className="relative z-10 max-w-7xl mx-auto">
         <AnimatePresence>
         {showSplash && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 1 }}
-            className="fixed inset-0 z-[100] bg-slate-800 flex flex-col items-center justify-center p-8 overflow-hidden"
+            transition={{ duration: 0.5 }}
+            className="fixed inset-0 z-[100] bg-slate-950 flex flex-col items-center justify-center overflow-hidden"
           >
-            {/* Cloudy Sky Background */}
-            <div className="absolute inset-0 bg-gradient-to-b from-slate-700 to-slate-900 opacity-50" />
-
-            {/* Icon Rain (Battery, Sun, DollarSign) */}
-            {[...Array(20)].map((_, i) => (
-              <motion.div
-                key={`rain-${i}`}
-                initial={{ y: -100, x: Math.random() * 100 + "%", opacity: 0 }}
-                animate={{ 
-                  y: 1200, 
-                  opacity: [0, 0.4, 0.4, 0],
-                  rotate: 360 
-                }}
-                transition={{ 
-                  duration: 4 + Math.random() * 4, 
-                  repeat: Infinity, 
-                  delay: Math.random() * 5,
-                  ease: "linear"
-                }}
-                className="absolute text-white/10 select-none pointer-events-none z-10"
-              >
-                {i % 3 === 0 ? <Battery className="w-6 h-6" /> : i % 3 === 1 ? <Sun className="w-6 h-6" /> : <DollarSign className="w-6 h-6" />}
-              </motion.div>
-            ))}
-
-            {/* Loan & Finance Particle Animation */}
-            {[...Array(30)].map((_, i) => {
-              const angle = Math.random() * Math.PI * 2;
-              const distance = 150 + Math.random() * 500;
-              const x = Math.cos(angle) * distance;
-              const y = Math.sin(angle) * distance;
-              
-              return (
-                <motion.div
-                  key={`particle-${i}`}
-                  initial={{ x: 0, y: 0, opacity: 0, scale: 0 }}
-                  animate={{ 
-                    x: x, 
-                    y: y, 
-                    opacity: [0, 0.5, 0.5, 0],
-                    scale: [0, 1, 1, 0],
-                    rotate: Math.random() * 360
-                  }}
-                  transition={{ 
-                    duration: 4 + Math.random() * 2,
-                    repeat: Infinity,
-                    delay: Math.random() * 2,
-                    ease: "easeOut"
-                  }}
-                  className="absolute select-none pointer-events-none z-10"
-                >
-                  {i % 3 === 0 ? (
-                    <DollarSign className="w-6 h-6 text-emerald-400/20" />
-                  ) : i % 3 === 1 ? (
-                    <TrendingUp className="w-6 h-6 text-blue-400/20" />
-                  ) : (
-                    <Calculator className="w-6 h-6 text-slate-400/20" />
-                  )}
-                </motion.div>
-              );
-            })}
-
-            {/* Sun Glow Effect (Behind Clouds) */}
+            {/* Blueprint grid — fades in then out with the SVG drawings */}
             <motion.div
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{ scale: [0, 1.2, 1], opacity: [0, 0.8, 0.5] }}
-              transition={{ delay: 0.8, duration: 2, ease: "easeOut" }}
-              className="absolute w-[600px] h-[600px] rounded-full bg-gradient-radial from-yellow-400/30 via-orange-500/10 to-transparent blur-[100px] z-0"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: [0, 0.55, 0.55, 0] }}
+              transition={{ duration: 2.0, times: [0, 0.15, 0.65, 1], ease: 'easeInOut' }}
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                backgroundImage: `linear-gradient(rgba(148,163,184,0.35) 1px, transparent 1px), linear-gradient(90deg, rgba(148,163,184,0.35) 1px, transparent 1px)`,
+                backgroundSize: '40px 40px'
+              }}
             />
 
-            {/* Logo as Sun */}
-            <motion.div
-              initial={{ scale: 0.5, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              transition={{ delay: 1.5, duration: 1.5, ease: "backOut" }}
-              className="relative z-20"
-            >
-              <img 
-                src={LOGO_URL} 
-                alt="Windmar Home" 
-                className="w-64 md:w-96 drop-shadow-[0_0_50px_rgba(250,204,21,0.6)]"
-                referrerPolicy="no-referrer"
-              />
-            </motion.div>
-
-            {/* Geometric Assembly Reveal (Blueprint Style) */}
-            <div className="absolute inset-0 z-30 pointer-events-none overflow-hidden flex items-center justify-center bg-slate-950">
-              {/* Blueprint Grid Lines (Background) */}
-              <motion.div 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 0.8 }}
-                transition={{ delay: 1.5, duration: 0.4 }}
-                className="absolute inset-0"
-                style={{
-                  backgroundImage: `linear-gradient(#94a3b8 1px, transparent 1px), linear-gradient(90deg, #94a3b8 1px, transparent 1px)`,
-                  backgroundSize: '40px 40px'
-                }}
-              />
-
-              {/* Drawing Lines (House/Solar Silhouette) */}
-              <svg 
-                viewBox="0 0 200 200" 
-                className="w-64 h-64 md:w-96 md:h-96 z-40"
-                fill="none" 
-                stroke="white" 
-                strokeWidth="1.2"
+            {/* SVG house + solar panels drawing */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <svg
+                viewBox="0 0 200 200"
+                className="w-56 h-56 md:w-80 md:h-80"
+                fill="none"
+                stroke="rgba(255,255,255,0.55)"
+                strokeWidth="1.3"
               >
-                {/* House Outline */}
                 <motion.path
                   d="M40,140 L40,80 L100,30 L160,80 L160,140 Z"
                   initial={{ pathLength: 0, opacity: 0 }}
                   animate={{ pathLength: 1, opacity: [0, 1, 0] }}
-                  transition={{ 
-                    duration: 1.5, 
-                    ease: "easeInOut",
-                    times: [0, 0.85, 1]
-                  }}
+                  transition={{ duration: 0.65, ease: 'easeInOut', times: [0, 0.6, 1] }}
                 />
-                {/* Solar Panel Grid (6x3 Division) */}
                 <motion.path
-                  d="
-                    M60,80 L140,80 L140,140 L60,140 Z 
-                    M60,100 L140,100 M60,120 L140,120 
-                    M73.3,80 L73.3,140 M86.6,80 L86.6,140 M100,80 L100,140 M113.3,80 L113.3,140 M126.6,80 L126.6,140
-                  "
+                  d="M60,80 L140,80 L140,140 L60,140 Z M60,100 L140,100 M60,120 L140,120 M73.3,80 L73.3,140 M86.6,80 L86.6,140 M100,80 L100,140 M113.3,80 L113.3,140 M126.6,80 L126.6,140"
                   initial={{ pathLength: 0, opacity: 0 }}
                   animate={{ pathLength: 1, opacity: [0, 1, 0] }}
-                  transition={{ 
-                    delay: 0.3,
-                    duration: 1.2, 
-                    ease: "easeInOut",
-                    times: [0, 0.8, 1]
-                  }}
+                  transition={{ delay: 0.15, duration: 0.55, ease: 'easeInOut', times: [0, 0.65, 1] }}
                 />
               </svg>
-
-              {/* The Logo Reveal (Fusing from lines) */}
-              <motion.div
-                initial={{ scale: 0.8, opacity: 0, filter: 'brightness(2) blur(10px)' }}
-                animate={{ scale: 1, opacity: 1, filter: 'brightness(1) blur(0px)' }}
-                transition={{ 
-                  delay: 1.6, 
-                  duration: 1, 
-                  ease: "easeOut" 
-                }}
-                className="absolute z-50"
-              >
-                <img 
-                  src={LOGO_URL} 
-                  alt="Windmar Home" 
-                  className="w-64 md:w-96 drop-shadow-[0_0_30px_rgba(255,255,255,0.4)]"
-                  referrerPolicy="no-referrer"
-                />
-              </motion.div>
-
-              {/* Background Clearing */}
-              <motion.div
-                initial={{ opacity: 1 }}
-                animate={{ opacity: 0 }}
-                transition={{ 
-                  delay: 4.8, 
-                  duration: 1, 
-                  ease: "easeInOut" 
-                }}
-                className="absolute inset-0 bg-slate-950 z-30"
-              />
             </div>
 
-            {/* Bottom Text */}
+            {/* Golden glow */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 4, duration: 1 }}
-              className="absolute bottom-20 z-40 text-center space-y-4"
+              initial={{ scale: 0.4, opacity: 0 }}
+              animate={{ scale: 1, opacity: 0.4 }}
+              transition={{ delay: 0.45, duration: 1.4, ease: 'easeOut' }}
+              className="absolute w-[420px] h-[420px] rounded-full blur-[90px] pointer-events-none z-0"
+              style={{ background: 'radial-gradient(circle, rgba(250,204,21,0.4) 0%, rgba(249,115,22,0.12) 55%, transparent 75%)' }}
+            />
+
+            {/* Logo — crystallizes from blur */}
+            <motion.div
+              initial={{ scale: 0.82, opacity: 0, filter: 'blur(14px) brightness(3)' }}
+              animate={{ scale: 1, opacity: 1, filter: 'blur(0px) brightness(1)' }}
+              transition={{ delay: 0.5, duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
+              className="relative z-20"
             >
-              <p className="text-xs font-black text-white/70 uppercase tracking-[0.4em]">
+              <img
+                src={LOGO_URL}
+                alt="Windmar Home"
+                className="w-64 md:w-80 drop-shadow-[0_0_35px_rgba(248,155,36,0.55)]"
+                referrerPolicy="no-referrer"
+              />
+            </motion.div>
+
+            {/* Progress bar + texto */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.5 }}
+              className="absolute bottom-14 z-30 text-center space-y-3 w-full px-8"
+            >
+              <p className="text-[9px] font-black text-white/50 uppercase tracking-[0.45em]">
                 Iniciando Cotizador Profesional LOAN
               </p>
-              <div className="w-64 h-1.5 bg-white/10 mx-auto rounded-full overflow-hidden border border-white/5">
+              <div className="w-52 h-[3px] bg-white/10 mx-auto rounded-full overflow-hidden">
                 <motion.div
                   initial={{ width: 0 }}
-                  animate={{ width: "100%" }}
-                  transition={{ delay: 0.5, duration: 3, ease: "linear" }}
-                  className="h-full bg-gradient-to-r from-yellow-500 via-yellow-400 to-orange-500"
+                  animate={{ width: '100%' }}
+                  transition={{ delay: 0.3, duration: 2.8, ease: 'linear' }}
+                  className="h-full rounded-full bg-gradient-to-r from-yellow-500 via-[#F89B24] to-orange-400"
                 />
               </div>
             </motion.div>
@@ -357,7 +249,7 @@ export default function App() {
                 onClick={() => updateInput('financing', 'WH')}
                 className={`relative p-4 rounded-3xl border-2 transition-all text-left group ${
                   inputs.financing === 'WH' 
-                    ? 'border-wh-blue bg-wh-blue/5 shadow-2xl shadow-wh-blue/40 z-20' 
+                    ? 'border-wh-blue bg-wh-blue/5 shadow-2xl shadow-wh-blue/20 dark:shadow-wh-blue/10 z-20' 
                     : 'border-slate-200 dark:border-white/[0.08] bg-white dark:bg-[#161b22] hover:border-slate-300 z-0'
                 }`}
               >
@@ -393,7 +285,7 @@ export default function App() {
                 onClick={() => updateInput('financing', 'ORIENTAL')}
                 className={`relative p-4 rounded-3xl border-2 transition-all text-left group ${
                   inputs.financing === 'ORIENTAL' 
-                    ? 'border-wh-orange bg-wh-orange/5 shadow-2xl shadow-wh-orange/40 z-20' 
+                    ? 'border-wh-orange bg-wh-orange/5 shadow-2xl shadow-wh-orange/20 dark:shadow-wh-orange/10 z-20' 
                     : 'border-slate-200 dark:border-white/[0.08] bg-white dark:bg-[#161b22] hover:border-slate-300 z-0'
                 }`}
               >
@@ -427,7 +319,7 @@ export default function App() {
             </div>
           </section>
 
-          <section className="bg-white dark:bg-[#161b22] rounded-[2rem] border border-slate-200 dark:border-white/[0.08] p-6 shadow-xl shadow-slate-200/50 space-y-6">
+          <section className="bg-white dark:bg-[#161b22] rounded-[2rem] border border-slate-200 dark:border-white/[0.08] p-6 shadow-xl shadow-slate-200/50 dark:shadow-none space-y-6">
             {/* Combined Solar & Storage Row */}
             <div className="grid grid-cols-2 gap-6">
               {/* Solar Column */}
@@ -832,7 +724,7 @@ function InputGroup({ label, children, className = "" }: { label: string, childr
       <label className="text-xs font-bold text-slate-600 dark:text-[#a0a4ad] ml-1">{label}</label>
       <motion.div
         whileHover={{ scale: 1.02 }}
-        className="bg-white dark:bg-[#0f1215] border border-slate-300 dark:border-white/[0.08] rounded-xl px-3 py-2.5 shadow-md focus-within:ring-4 focus-within:ring-blue-500/10 focus-within:border-blue-500 transition-all relative"
+        className="bg-white dark:bg-[#0f1215] border border-slate-300 dark:border-white/[0.08] rounded-xl px-3 py-2.5 shadow-md dark:shadow-none focus-within:ring-4 focus-within:ring-blue-500/10 focus-within:border-blue-500 transition-all relative"
       >
         {children}
       </motion.div>
