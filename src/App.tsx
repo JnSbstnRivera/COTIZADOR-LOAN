@@ -707,14 +707,40 @@ export default function App() {
       />
 
       {/* Footer */}
-      <footer className="max-w-[1600px] mx-auto px-6 py-8 border-t border-slate-200 mt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-slate-400 text-[11px]">
-        <div className="flex items-center gap-4">
-          <img src={LOGO_URL} alt="Windmar Home" className="h-5 grayscale opacity-50" referrerPolicy="no-referrer" />
-          <p>© 2026 Windmar Home Support. Todos los derechos reservados.</p>
+      <footer className="max-w-[1600px] mx-auto px-6 mt-8 pb-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-8 border-t border-slate-200">
+          <div className="flex gap-4">
+            <div className="bg-blue-600/10 p-3 rounded-xl h-fit">
+              <CreditCard className="text-blue-600" size={24} />
+            </div>
+            <div>
+              <h4 className="font-bold text-slate-900 text-sm mb-1">Financiamiento Solar</h4>
+              <p className="text-slate-600 text-xs leading-relaxed">Opciones de préstamo a 5, 7 y 10 años con tasas competitivas para tu sistema solar.</p>
+            </div>
+          </div>
+          <div className="flex gap-4">
+            <div className="bg-emerald-600/10 p-3 rounded-xl h-fit">
+              <ShieldCheck className="text-emerald-600" size={24} />
+            </div>
+            <div>
+              <h4 className="font-bold text-slate-900 text-sm mb-1">Garantía Incluida</h4>
+              <p className="text-slate-600 text-xs leading-relaxed">Protección completa del sistema durante todo el período de financiamiento.</p>
+            </div>
+          </div>
+          <div className="flex gap-4">
+            <div className="bg-orange-400/10 p-3 rounded-xl h-fit">
+              <TrendingUp className="text-orange-400" size={24} />
+            </div>
+            <div>
+              <h4 className="font-bold text-slate-900 text-sm mb-1">Ahorro Real</h4>
+              <p className="text-slate-600 text-xs leading-relaxed">Genera ahorros desde el primer mes y recupera tu inversión en pocos años.</p>
+            </div>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
-          Estado del Sistema: Operacional
+        <div className="text-center pt-8 pb-4">
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">
+            © 2026 Equipo de Análisis y Desarrollo — Call Center Windmar Home
+          </p>
         </div>
       </footer>
       </div>
