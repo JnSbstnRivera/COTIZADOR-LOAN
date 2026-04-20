@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap');
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
   --font-sans: 'Outfit', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
@@ -21,7 +22,7 @@
 
 @layer base {
   body {
-    @apply antialiased bg-bg text-text-main min-h-screen relative overflow-x-hidden;
+    @apply antialiased bg-bg dark:bg-[#0f1215] text-text-main dark:text-[#e8eaed] min-h-screen relative overflow-x-hidden;
     font-family: var(--font-sans);
   }
 

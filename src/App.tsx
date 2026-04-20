@@ -1,16 +1,16 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { 
-  Sun, 
-  Battery, 
-  Calculator, 
-  ShieldCheck, 
+import {
+  Sun,
+  Moon,
+  Battery,
+  Calculator,
+  ShieldCheck,
   DollarSign,
   Zap,
   CheckCircle2,
   TrendingUp,
   FileText,
-  Phone,
   CreditCard,
   Building2,
   ArrowRight,
@@ -46,6 +46,19 @@ export default function App() {
     return () => clearTimeout(timer);
   }, []);
 
+  const [isDarkMode, setIsDarkMode] = useState(() => localStorage.getItem('wh-theme') === 'dark');
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (isDarkMode) {
+      root.classList.add('dark');
+      localStorage.setItem('wh-theme', 'dark');
+    } else {
+      root.classList.remove('dark');
+      localStorage.setItem('wh-theme', 'light');
+    }
+  }, [isDarkMode]);
+
   const results = useMemo(() => calculateQuote(inputs), [inputs]);
   const [pdfModalAbierto, setPdfModalAbierto] = useState(false);
 
@@ -80,7 +93,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f1f5f9] text-slate-900 font-sans selection:bg-blue-100 relative overflow-x-hidden">
+    <div className="min-h-screen bg-[#f1f5f9] dark:bg-[#0f1215] text-slate-900 dark:text-[#e8eaed] font-sans selection:bg-blue-100 relative overflow-x-hidden">
       {/* High-Impact Background Elements */}
       <div className="fixed inset-0 z-0 pointer-events-none">
         <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-blue-400/10 blur-[120px]" />
@@ -295,7 +308,7 @@ export default function App() {
           <img src={LOGO_URL} alt="Windmar Home" className="h-16 md:h-24" referrerPolicy="no-referrer" />
           <div className="hidden md:block h-10 w-px bg-wh-grey/20" />
           <div className="hidden md:block">
-            <h1 className="text-2xl font-black tracking-tighter text-wh-black uppercase">
+            <h1 className="text-2xl font-black tracking-tighter text-wh-black dark:text-[#e8eaed] uppercase">
               Cotizador Solar Loan
             </h1>
             <p className="text-[10px] font-bold uppercase tracking-[0.3em] transition-colors text-wh-blue">
@@ -305,12 +318,25 @@ export default function App() {
         </div>
 
         <div className="flex items-center gap-4">
-          <div className="flex flex-col items-end">
-            <div className="flex items-center gap-2 transition-colors text-wh-blue">
-              <Phone className="w-4 h-4" />
-              <span className="text-lg font-black tracking-tighter">787-395-7766</span>
+          <div className="flex items-center gap-2 bg-slate-100 dark:bg-white/10 p-1 pr-3 rounded-full border border-slate-200 dark:border-white/15 shadow-sm">
+            <motion.button
+              onClick={() => setIsDarkMode(d => !d)}
+              animate={{ rotate: isDarkMode ? 360 : 0 }}
+              transition={{ type: "spring", stiffness: 200, damping: 15 }}
+              className={`p-1.5 rounded-full transition-colors duration-500 ${
+                isDarkMode
+                  ? 'bg-[#F89B24] text-white shadow-[0_0_10px_rgba(248,155,36,0.3)]'
+                  : 'bg-[#1D429B] text-white shadow-[0_0_10px_rgba(29,66,155,0.2)]'
+              }`}
+            >
+              {isDarkMode ? <Sun size={14} /> : <Moon size={14} />}
+            </motion.button>
+            <div className="flex flex-col items-start leading-none">
+              <span className="text-[8px] font-black text-slate-400 dark:text-white/60 uppercase tracking-tighter">Tema</span>
+              <span className={`text-[9px] font-black uppercase tracking-widest ${isDarkMode ? 'text-[#F89B24]' : 'text-[#1D429B]'}`}>
+                {isDarkMode ? 'Oscuro' : 'Claro'}
+              </span>
             </div>
-            <p className="text-[9px] font-bold text-wh-grey uppercase tracking-widest">Línea Directa Windmar</p>
           </div>
         </div>
       </div>
@@ -332,18 +358,18 @@ export default function App() {
                 className={`relative p-4 rounded-3xl border-2 transition-all text-left group ${
                   inputs.financing === 'WH' 
                     ? 'border-wh-blue bg-wh-blue/5 shadow-2xl shadow-wh-blue/40 z-20' 
-                    : 'border-slate-200 bg-white hover:border-slate-300 z-0'
+                    : 'border-slate-200 dark:border-white/[0.08] bg-white dark:bg-[#161b22] hover:border-slate-300 z-0'
                 }`}
               >
                 <div className="flex flex-col gap-3 relative z-10">
                   <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors overflow-hidden ${
-                    inputs.financing === 'WH' ? 'bg-white' : 'bg-slate-100'
+                    inputs.financing === 'WH' ? 'bg-white dark:bg-white/10' : 'bg-slate-100 dark:bg-[#0f1215]'
                   }`}>
                     <img src={WH_LOGO_URL} alt="WH Financial" className="w-full h-full object-contain p-1" referrerPolicy="no-referrer" />
                   </div>
                   <div>
                     <p className={`text-xs font-black uppercase tracking-tight ${
-                      inputs.financing === 'WH' ? 'text-wh-blue' : 'text-wh-black'
+                      inputs.financing === 'WH' ? 'text-wh-blue' : 'text-wh-black dark:text-[#e8eaed]'
                     }`}>WH Financial</p>
                     <p className="text-[9px] font-bold text-wh-grey mt-0.5">Tasas fijas competitivas</p>
                   </div>
@@ -368,18 +394,18 @@ export default function App() {
                 className={`relative p-4 rounded-3xl border-2 transition-all text-left group ${
                   inputs.financing === 'ORIENTAL' 
                     ? 'border-wh-orange bg-wh-orange/5 shadow-2xl shadow-wh-orange/40 z-20' 
-                    : 'border-slate-200 bg-white hover:border-slate-300 z-0'
+                    : 'border-slate-200 dark:border-white/[0.08] bg-white dark:bg-[#161b22] hover:border-slate-300 z-0'
                 }`}
               >
                 <div className="flex flex-col gap-3 relative z-10">
                   <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors overflow-hidden ${
-                    inputs.financing === 'ORIENTAL' ? 'bg-white' : 'bg-slate-100'
+                    inputs.financing === 'ORIENTAL' ? 'bg-white dark:bg-white/10' : 'bg-slate-100 dark:bg-[#0f1215]'
                   }`}>
                     <img src={ORIENTAL_LOGO_URL} alt="Oriental Bank" className="w-full h-full object-contain p-1" referrerPolicy="no-referrer" />
                   </div>
                   <div>
                     <p className={`text-xs font-black uppercase tracking-tight ${
-                      inputs.financing === 'ORIENTAL' ? 'text-wh-orange' : 'text-wh-black'
+                      inputs.financing === 'ORIENTAL' ? 'text-wh-orange' : 'text-wh-black dark:text-[#e8eaed]'
                     }`}>Oriental Bank</p>
                     <p className="text-[9px] font-bold text-wh-grey mt-0.5">Opciones flexibles</p>
                   </div>
@@ -401,7 +427,7 @@ export default function App() {
             </div>
           </section>
 
-          <section className="bg-white rounded-[2rem] border border-slate-200 p-6 shadow-xl shadow-slate-200/50 space-y-6">
+          <section className="bg-white dark:bg-[#161b22] rounded-[2rem] border border-slate-200 dark:border-white/[0.08] p-6 shadow-xl shadow-slate-200/50 space-y-6">
             {/* Combined Solar & Storage Row */}
             <div className="grid grid-cols-2 gap-6">
               {/* Solar Column */}
@@ -453,16 +479,17 @@ export default function App() {
                       className="w-full p-1.5 bg-wh-blue/5 rounded-xl border border-wh-blue/10 text-center"
                     >
                       <p className="text-[8px] font-black text-wh-blue uppercase tracking-widest leading-none mb-0.5">Capacidad</p>
-                      <p className="text-[10px] font-black text-wh-black">
+                      <p className="text-[10px] font-black text-wh-black dark:text-[#e8eaed]">
                         {formatNumber(inputs.panels * PANEL_WATTAGE)}W
                       </p>
                     </motion.div>
                   )}
 
-                  <Toggle 
-                    active={inputs.extendedSolarWarranty} 
-                    onClick={() => updateInput('extendedSolarWarranty', !inputs.extendedSolarWarranty)} 
+                  <Toggle
+                    active={inputs.extendedSolarWarranty}
+                    onClick={() => updateInput('extendedSolarWarranty', !inputs.extendedSolarWarranty)}
                     subtitle="($0.15/watt)"
+                    darkMode={isDarkMode}
                   />
                 </div>
               </div>
@@ -516,30 +543,31 @@ export default function App() {
                       className="w-full p-1.5 bg-wh-blue/5 rounded-xl border border-wh-blue/10 text-center"
                     >
                       <p className="text-[8px] font-black text-wh-blue uppercase tracking-widest leading-none mb-0.5">Capacidad</p>
-                      <p className="text-[10px] font-black text-wh-black">
+                      <p className="text-[10px] font-black text-wh-black dark:text-[#e8eaed]">
                         {inputs.batteries * BATTERY_CAPACITY} kWh
                       </p>
                     </motion.div>
                   )}
 
-                  <Toggle 
-                    active={inputs.extendedBatteryWarranty} 
-                    onClick={() => updateInput('extendedBatteryWarranty', !inputs.extendedBatteryWarranty)} 
+                  <Toggle
+                    active={inputs.extendedBatteryWarranty}
+                    onClick={() => updateInput('extendedBatteryWarranty', !inputs.extendedBatteryWarranty)}
                     subtitle="($3k x bat)"
+                    darkMode={isDarkMode}
                   />
                 </div>
               </div>
             </div>
 
-            <div className="h-px bg-slate-100" />
+            <div className="h-px bg-slate-100 dark:bg-white/[0.06]" />
 
             {/* Down Payment */}
             <div className="space-y-4">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 border border-emerald-100">
+                <div className="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30">
                   <DollarSign className="w-4 h-4" />
                 </div>
-                <h3 className="text-xs font-black text-wh-black uppercase tracking-tight">Inversión Inicial</h3>
+                <h3 className="text-xs font-black text-wh-black dark:text-[#e8eaed] uppercase tracking-tight">Inversión Inicial</h3>
               </div>
               
               <InputGroup label="Pronto Pago ($)">
@@ -578,14 +606,14 @@ export default function App() {
                   <motion.div 
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="col-span-full p-6 bg-amber-50 border border-amber-200 rounded-[2rem] flex flex-col items-center text-center space-y-3"
+                    className="col-span-full p-6 bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800/30 rounded-[2rem] flex flex-col items-center text-center space-y-3"
                   >
                     <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-600">
                       <ShieldCheck className="w-6 h-6" />
                     </div>
                     <div className="space-y-1">
-                      <h4 className="text-base font-black text-amber-900 uppercase tracking-tight">Financiamiento No Disponible</h4>
-                      <p className="text-xs font-medium text-amber-800 max-w-md leading-relaxed">
+                      <h4 className="text-base font-black text-amber-900 dark:text-amber-200 uppercase tracking-tight">Financiamiento No Disponible</h4>
+                      <p className="text-xs font-medium text-amber-800 dark:text-amber-300 max-w-md leading-relaxed">
                         {results.error}
                       </p>
                     </div>
@@ -597,15 +625,15 @@ export default function App() {
                       initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ delay: idx * 0.05 }}
-                      className="bg-white border border-slate-200 rounded-[1.25rem] p-3 transition-all group cursor-default hover:border-wh-blue hover:shadow-xl hover:shadow-wh-blue/20"
+                      className="bg-white dark:bg-[#161b22] border border-slate-200 dark:border-white/[0.08] rounded-[1.25rem] p-3 transition-all group cursor-default hover:border-wh-blue hover:shadow-xl hover:shadow-wh-blue/20"
                     >
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-2">
-                          <div className="w-7 h-7 rounded-lg bg-slate-50 flex items-center justify-center transition-colors text-yellow-400 group-hover:bg-wh-blue group-hover:text-yellow-400">
+                          <div className="w-7 h-7 rounded-lg bg-slate-50 dark:bg-[#0f1215] flex items-center justify-center transition-colors text-yellow-400 group-hover:bg-wh-blue group-hover:text-yellow-400">
                             <Calculator className="w-3.5 h-3.5" />
                           </div>
                           <div>
-                            <p className="text-[10px] font-black text-wh-black">{pay.years} Años ({pay.years * 12} meses)</p>
+                            <p className="text-[10px] font-black text-wh-black dark:text-[#e8eaed]">{pay.years} Años ({pay.years * 12} meses)</p>
                             <p className="text-[8px] font-bold uppercase tracking-widest text-wh-blue">
                               {pay.amountMax ? 'Rango Estimado' : (pay.label || 'Tasa Fija')}
                             </p>
@@ -623,7 +651,7 @@ export default function App() {
                       </div>
                       <div className="flex items-end justify-between">
                         <div className="flex flex-col">
-                          <p className="text-xl font-black tracking-tight text-wh-black">
+                          <p className="text-xl font-black tracking-tight text-wh-black dark:text-[#e8eaed]">
                             {pay.amountMax 
                               ? `${formatCurrency(pay.amount)} - ${formatCurrency(pay.amountMax)}`
                               : formatCurrency(pay.amount)
@@ -640,7 +668,7 @@ export default function App() {
           </section>
 
           {/* Details Breakdown */}
-          <section className="bg-white rounded-[2rem] border border-slate-200 overflow-hidden">
+          <section className="bg-white dark:bg-[#161b22] rounded-[2rem] border border-slate-200 dark:border-white/[0.08] overflow-hidden">
             <div className="py-3 px-6 border-b-2 flex items-center justify-between transition-colors border-wh-blue bg-wh-blue/5">
               <h3 className="text-[12px] font-black uppercase tracking-[0.2em] text-wh-blue">Resumen del Proyecto</h3>
               <div className="flex items-center gap-3">
@@ -680,7 +708,7 @@ export default function App() {
               </div>
               {results.error && (
                 <div className="pt-3 border-t border-slate-100">
-                  <p className="text-[10px] font-bold text-amber-600 bg-amber-50 p-2 rounded-xl border border-amber-100 flex items-center gap-2">
+                  <p className="text-[10px] font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/10 p-2 rounded-xl border border-amber-100 dark:border-amber-800/20 flex items-center gap-2">
                     <ShieldCheck className="w-3.5 h-3.5" />
                     {results.error}
                   </p>
@@ -708,14 +736,14 @@ export default function App() {
 
       {/* Footer */}
       <footer className="max-w-[1600px] mx-auto px-6 mt-8 pb-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-8 border-t border-slate-200">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-8 border-t border-slate-200 dark:border-white/[0.08]">
           <div className="flex gap-4">
             <div className="bg-blue-600/10 p-3 rounded-xl h-fit">
               <CreditCard className="text-blue-600" size={24} />
             </div>
             <div>
-              <h4 className="font-bold text-slate-900 text-sm mb-1">Financiamiento Solar</h4>
-              <p className="text-slate-600 text-xs leading-relaxed">Opciones de préstamo a 5, 7 y 10 años con tasas competitivas para tu sistema solar.</p>
+              <h4 className="font-bold text-slate-900 dark:text-[#e8eaed] text-sm mb-1">Financiamiento Solar</h4>
+              <p className="text-slate-600 dark:text-[#a0a4ad] text-xs leading-relaxed">Opciones de préstamo a 5, 7 y 10 años con tasas competitivas para tu sistema solar.</p>
             </div>
           </div>
           <div className="flex gap-4">
@@ -723,8 +751,8 @@ export default function App() {
               <ShieldCheck className="text-emerald-600" size={24} />
             </div>
             <div>
-              <h4 className="font-bold text-slate-900 text-sm mb-1">Garantía Incluida</h4>
-              <p className="text-slate-600 text-xs leading-relaxed">Protección completa del sistema durante todo el período de financiamiento.</p>
+              <h4 className="font-bold text-slate-900 dark:text-[#e8eaed] text-sm mb-1">Garantía Incluida</h4>
+              <p className="text-slate-600 dark:text-[#a0a4ad] text-xs leading-relaxed">Protección completa del sistema durante todo el período de financiamiento.</p>
             </div>
           </div>
           <div className="flex gap-4">
@@ -732,13 +760,13 @@ export default function App() {
               <TrendingUp className="text-orange-400" size={24} />
             </div>
             <div>
-              <h4 className="font-bold text-slate-900 text-sm mb-1">Ahorro Real</h4>
-              <p className="text-slate-600 text-xs leading-relaxed">Genera ahorros desde el primer mes y recupera tu inversión en pocos años.</p>
+              <h4 className="font-bold text-slate-900 dark:text-[#e8eaed] text-sm mb-1">Ahorro Real</h4>
+              <p className="text-slate-600 dark:text-[#a0a4ad] text-xs leading-relaxed">Genera ahorros desde el primer mes y recupera tu inversión en pocos años.</p>
             </div>
           </div>
         </div>
         <div className="text-center pt-8 pb-4">
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">
+          <p className="text-[10px] font-black text-slate-400 dark:text-[#6b7280] uppercase tracking-[0.3em]">
             © 2026 Equipo de Análisis y Desarrollo — Call Center Windmar Home
           </p>
         </div>
@@ -756,7 +784,7 @@ function CustomSelect({ value, options, onChange, placeholder }: { value: number
     <div className="relative w-full">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between bg-transparent text-xs font-bold outline-none cursor-pointer text-wh-black"
+        className="w-full flex items-center justify-between bg-transparent text-xs font-bold outline-none cursor-pointer text-wh-black dark:text-[#e8eaed]"
       >
         <span className="truncate">{selectedOption ? selectedOption.label : placeholder}</span>
         <ChevronDown className={`w-3.5 h-3.5 text-wh-grey transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
@@ -774,7 +802,7 @@ function CustomSelect({ value, options, onChange, placeholder }: { value: number
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -10, scale: 0.95 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
-              className="absolute left-0 right-0 top-full mt-2 bg-white border border-slate-200 rounded-2xl shadow-2xl shadow-wh-blue/20 z-50 max-h-48 overflow-y-auto py-2 scrollbar-hide"
+              className="absolute left-0 right-0 top-full mt-2 bg-white dark:bg-[#161b22] border border-slate-200 dark:border-white/[0.08] rounded-2xl shadow-2xl shadow-wh-blue/20 z-50 max-h-48 overflow-y-auto py-2 scrollbar-hide"
             >
               {options.map((opt) => (
                 <button
@@ -784,7 +812,7 @@ function CustomSelect({ value, options, onChange, placeholder }: { value: number
                     setIsOpen(false);
                   }}
                   className={`w-full text-left px-4 py-2 text-xs font-bold transition-colors hover:bg-wh-blue/5 ${
-                    value === opt.value ? 'text-wh-blue bg-wh-blue/5' : 'text-wh-black'
+                    value === opt.value ? 'text-wh-blue bg-wh-blue/5 dark:bg-wh-blue/10' : 'text-wh-black dark:text-[#e8eaed]'
                   }`}
                 >
                   {opt.label}
@@ -801,10 +829,10 @@ function CustomSelect({ value, options, onChange, placeholder }: { value: number
 function InputGroup({ label, children, className = "" }: { label: string, children: React.ReactNode, className?: string }) {
   return (
     <div className={`space-y-1.5 ${className}`}>
-      <label className="text-xs font-bold text-slate-600 ml-1">{label}</label>
-      <motion.div 
+      <label className="text-xs font-bold text-slate-600 dark:text-[#a0a4ad] ml-1">{label}</label>
+      <motion.div
         whileHover={{ scale: 1.02 }}
-        className="bg-white border border-slate-300 rounded-xl px-3 py-2.5 shadow-md focus-within:ring-4 focus-within:ring-blue-500/10 focus-within:border-blue-500 transition-all relative"
+        className="bg-white dark:bg-[#0f1215] border border-slate-300 dark:border-white/[0.08] rounded-xl px-3 py-2.5 shadow-md focus-within:ring-4 focus-within:ring-blue-500/10 focus-within:border-blue-500 transition-all relative"
       >
         {children}
       </motion.div>
@@ -812,18 +840,18 @@ function InputGroup({ label, children, className = "" }: { label: string, childr
   );
 }
 
-function Toggle({ active, onClick, subtitle }: { active: boolean, onClick: () => void, subtitle?: string }) {
+function Toggle({ active, onClick, subtitle, darkMode = false }: { active: boolean, onClick: () => void, subtitle?: string, darkMode?: boolean }) {
   return (
-    <motion.div 
+    <motion.div
       initial={false}
-      animate={{ 
-        backgroundColor: active ? 'rgba(0, 76, 151, 0.08)' : 'rgba(241, 245, 249, 0.5)',
-        borderColor: active ? 'rgba(0, 76, 151, 0.2)' : 'rgba(226, 232, 240, 1)'
+      animate={{
+        backgroundColor: active ? 'rgba(0, 76, 151, 0.08)' : (darkMode ? 'rgba(22, 27, 34, 0.5)' : 'rgba(241, 245, 249, 0.5)'),
+        borderColor: active ? 'rgba(0, 76, 151, 0.2)' : (darkMode ? 'rgba(255, 255, 255, 0.08)' : 'rgba(226, 232, 240, 1)')
       }}
       className="w-full p-2.5 rounded-xl border flex items-center justify-between transition-colors"
     >
       <div className="flex flex-col">
-        <span className="text-[10px] font-black text-wh-black uppercase tracking-tight">GARANTÍA EXTENDIDA</span>
+        <span className="text-[10px] font-black text-wh-black dark:text-[#e8eaed] uppercase tracking-tight">GARANTÍA EXTENDIDA</span>
         <AnimatePresence>
           {active && subtitle && (
             <motion.span 
@@ -841,7 +869,7 @@ function Toggle({ active, onClick, subtitle }: { active: boolean, onClick: () =>
       <motion.button 
         whileTap={{ scale: 0.9 }}
         onClick={onClick}
-        className={`w-12 h-6 rounded-full relative transition-colors duration-500 overflow-hidden ${active ? 'bg-wh-blue' : 'bg-slate-200'}`}
+        className={`w-12 h-6 rounded-full relative transition-colors duration-500 overflow-hidden ${active ? 'bg-wh-blue' : 'bg-slate-200 dark:bg-slate-600'}`}
       >
         <motion.div 
           animate={{ 
@@ -887,13 +915,13 @@ function DataRow({ label, value, highlight, muted, totalValue, financing }: { la
           {totalValue !== undefined && (
             <button 
               onClick={() => setIsOpen(!isOpen)} 
-              className={`p-1 hover:bg-slate-50 rounded-md transition-colors ${hoverColor}`}
+              className={`p-1 hover:bg-slate-50 dark:hover:bg-white/5 rounded-md transition-colors ${hoverColor}`}
             >
               {isOpen ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
             </button>
           )}
         </div>
-        <span className={`text-sm font-bold ${highlight ? (financing === 'WH' ? 'text-wh-blue bg-yellow-400/20 px-2 rounded-lg' : accentColor) : 'text-wh-black'}`}>{value}</span>
+        <span className={`text-sm font-bold ${highlight ? (financing === 'WH' ? 'text-wh-blue bg-yellow-400/20 px-2 rounded-lg' : accentColor) : 'text-wh-black dark:text-[#e8eaed]'}`}>{value}</span>
       </div>
       <AnimatePresence>
         {isOpen && totalValue !== undefined && (
