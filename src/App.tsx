@@ -42,7 +42,7 @@ export default function App() {
   });
 
   useEffect(() => {
-    const timer = setTimeout(() => setShowSplash(false), 3500);
+    const timer = setTimeout(() => setShowSplash(false), 4000);
     return () => clearTimeout(timer);
   }, []);
 
@@ -111,62 +111,81 @@ export default function App() {
             transition={{ duration: 0.5 }}
             className="fixed inset-0 z-[100] bg-slate-950 flex flex-col items-center justify-center overflow-hidden"
           >
-            {/* Blueprint grid — fades in then out with the SVG drawings */}
+            {/* Blueprint grid */}
             <motion.div
               initial={{ opacity: 0 }}
-              animate={{ opacity: [0, 0.55, 0.55, 0] }}
-              transition={{ duration: 2.0, times: [0, 0.15, 0.65, 1], ease: 'easeInOut' }}
+              animate={{ opacity: [0, 0.5, 0.5, 0] }}
+              transition={{ duration: 2.8, times: [0, 0.08, 0.72, 1], ease: 'easeInOut' }}
               className="absolute inset-0 pointer-events-none"
               style={{
-                backgroundImage: `linear-gradient(rgba(148,163,184,0.35) 1px, transparent 1px), linear-gradient(90deg, rgba(148,163,184,0.35) 1px, transparent 1px)`,
+                backgroundImage: `linear-gradient(rgba(148,163,184,0.28) 1px, transparent 1px), linear-gradient(90deg, rgba(148,163,184,0.28) 1px, transparent 1px)`,
                 backgroundSize: '40px 40px'
               }}
             />
 
-            {/* SVG house + solar panels drawing */}
+            {/* SVG casa + paneles solares */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               <svg
                 viewBox="0 0 200 200"
-                className="w-56 h-56 md:w-80 md:h-80"
+                className="w-72 h-72 md:w-[420px] md:h-[420px]"
                 fill="none"
-                stroke="rgba(255,255,255,0.55)"
-                strokeWidth="1.3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
               >
+                <defs>
+                  <filter id="line-glow" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="1.8" result="blur" />
+                    <feMerge>
+                      <feMergeNode in="blur" />
+                      <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                  </filter>
+                </defs>
+
+                {/* Contorno de la casa — blanco brillante */}
                 <motion.path
                   d="M40,140 L40,80 L100,30 L160,80 L160,140 Z"
+                  stroke="rgba(255,255,255,0.95)"
+                  strokeWidth="2.2"
+                  filter="url(#line-glow)"
                   initial={{ pathLength: 0, opacity: 0 }}
-                  animate={{ pathLength: 1, opacity: [0, 1, 0] }}
-                  transition={{ duration: 0.65, ease: 'easeInOut', times: [0, 0.6, 1] }}
+                  animate={{ pathLength: 1, opacity: [0, 1, 1, 0] }}
+                  transition={{ duration: 2.4, ease: 'easeInOut', times: [0, 0.15, 0.78, 1] }}
                 />
+
+                {/* Paneles solares — naranja Windmar */}
                 <motion.path
                   d="M60,80 L140,80 L140,140 L60,140 Z M60,100 L140,100 M60,120 L140,120 M73.3,80 L73.3,140 M86.6,80 L86.6,140 M100,80 L100,140 M113.3,80 L113.3,140 M126.6,80 L126.6,140"
+                  stroke="rgba(248,155,36,0.95)"
+                  strokeWidth="1.6"
+                  filter="url(#line-glow)"
                   initial={{ pathLength: 0, opacity: 0 }}
-                  animate={{ pathLength: 1, opacity: [0, 1, 0] }}
-                  transition={{ delay: 0.15, duration: 0.55, ease: 'easeInOut', times: [0, 0.65, 1] }}
+                  animate={{ pathLength: 1, opacity: [0, 1, 1, 0] }}
+                  transition={{ delay: 0.35, duration: 2.1, ease: 'easeInOut', times: [0, 0.2, 0.78, 1] }}
                 />
               </svg>
             </div>
 
-            {/* Golden glow */}
+            {/* Golden glow detrás del logo */}
             <motion.div
               initial={{ scale: 0.4, opacity: 0 }}
-              animate={{ scale: 1, opacity: 0.4 }}
-              transition={{ delay: 0.45, duration: 1.4, ease: 'easeOut' }}
-              className="absolute w-[420px] h-[420px] rounded-full blur-[90px] pointer-events-none z-0"
-              style={{ background: 'radial-gradient(circle, rgba(250,204,21,0.4) 0%, rgba(249,115,22,0.12) 55%, transparent 75%)' }}
+              animate={{ scale: 1, opacity: 0.42 }}
+              transition={{ delay: 0.5, duration: 1.8, ease: 'easeOut' }}
+              className="absolute w-[480px] h-[480px] rounded-full blur-[100px] pointer-events-none z-0"
+              style={{ background: 'radial-gradient(circle, rgba(250,204,21,0.45) 0%, rgba(249,115,22,0.12) 55%, transparent 75%)' }}
             />
 
-            {/* Logo — crystallizes from blur */}
+            {/* Logo — cristaliza cuando la casa ya está dibujada */}
             <motion.div
-              initial={{ scale: 0.82, opacity: 0, filter: 'blur(14px) brightness(3)' }}
+              initial={{ scale: 0.82, opacity: 0, filter: 'blur(16px) brightness(3)' }}
               animate={{ scale: 1, opacity: 1, filter: 'blur(0px) brightness(1)' }}
-              transition={{ delay: 0.5, duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ delay: 1.1, duration: 1.3, ease: [0.16, 1, 0.3, 1] }}
               className="relative z-20"
             >
               <img
                 src={LOGO_URL}
                 alt="Windmar Home"
-                className="w-64 md:w-80 drop-shadow-[0_0_35px_rgba(248,155,36,0.55)]"
+                className="w-64 md:w-80 drop-shadow-[0_0_40px_rgba(248,155,36,0.6)]"
                 referrerPolicy="no-referrer"
               />
             </motion.div>
@@ -185,7 +204,7 @@ export default function App() {
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: '100%' }}
-                  transition={{ delay: 0.3, duration: 2.8, ease: 'linear' }}
+                  transition={{ delay: 0.3, duration: 3.3, ease: 'linear' }}
                   className="h-full rounded-full bg-gradient-to-r from-yellow-500 via-[#F89B24] to-orange-400"
                 />
               </div>
