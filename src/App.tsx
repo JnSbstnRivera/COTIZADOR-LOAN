@@ -214,9 +214,9 @@ export default function App() {
       </AnimatePresence>
 
       {/* Top Section / Header Integrated */}
-      <div className="px-6 pt-6 pb-4 flex flex-col md:flex-row items-center justify-between gap-4">
-        <div className="flex items-center gap-6">
-          <img src={LOGO_URL} alt="Windmar Home" className="h-16 md:h-24" referrerPolicy="no-referrer" />
+      <div className="px-3 sm:px-6 pt-3 sm:pt-6 pb-3 sm:pb-4 flex flex-col md:flex-row items-center justify-between gap-3 sm:gap-4">
+        <div className="flex items-center gap-3 sm:gap-6">
+          <img src={LOGO_URL} alt="Windmar Home" className="h-12 sm:h-16 md:h-24" referrerPolicy="no-referrer" />
           <div className="hidden md:block h-10 w-px bg-wh-grey/20" />
           <div className="hidden md:block">
             <h1 className="text-2xl font-black tracking-tighter text-wh-black dark:text-[#e8eaed] uppercase">
@@ -252,7 +252,7 @@ export default function App() {
         </div>
       </div>
 
-      <main className="px-6 py-4 grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <main className="px-3 sm:px-6 py-3 sm:py-4 grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-8">
         
         {/* Left Column: Inputs */}
         <motion.div 
@@ -338,9 +338,9 @@ export default function App() {
             </div>
           </section>
 
-          <section className="bg-white dark:bg-[#161b22] rounded-[2rem] border border-slate-200 dark:border-white/[0.08] p-6 shadow-xl shadow-slate-200/50 dark:shadow-none space-y-6">
+          <section className="bg-white dark:bg-[#161b22] rounded-[2rem] border border-slate-200 dark:border-white/[0.08] p-4 sm:p-6 shadow-xl shadow-slate-200/50 dark:shadow-none space-y-6">
             {/* Combined Solar & Storage Row */}
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-2 gap-3 sm:gap-6">
               {/* Solar Column */}
               <div className="flex flex-col items-center space-y-4">
                 <motion.div 
@@ -580,7 +580,7 @@ export default function App() {
 
           {/* Details Breakdown */}
           <section className="bg-white dark:bg-[#161b22] rounded-[2rem] border border-slate-200 dark:border-white/[0.08] overflow-hidden">
-            <div className="py-3 px-6 border-b-2 flex items-center justify-between transition-colors border-wh-blue bg-wh-blue/5">
+            <div className="py-3 px-3 sm:px-6 border-b-2 flex flex-wrap items-center justify-between gap-2 transition-colors border-wh-blue bg-wh-blue/5">
               <h3 className="text-[12px] font-black uppercase tracking-[0.2em] text-wh-blue">Resumen del Proyecto</h3>
               <div className="flex items-center gap-3">
                 {!results.error && (
@@ -595,8 +595,8 @@ export default function App() {
                 <FileText className="w-4 h-4 text-wh-blue" />
               </div>
             </div>
-            <div className="p-6 space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="p-4 sm:p-6 space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                 <div className={`space-y-3 transition-opacity ${results.error ? 'opacity-30' : ''}`}>
                   <p className="text-[9px] font-black uppercase tracking-widest transition-colors text-wh-blue">Componentes</p>
                   <div className="space-y-2">
@@ -646,7 +646,7 @@ export default function App() {
       />
 
       {/* Footer */}
-      <footer className="max-w-[1600px] mx-auto px-6 mt-8 pb-4">
+      <footer className="max-w-[1600px] mx-auto px-3 sm:px-6 mt-6 sm:mt-8 pb-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-8 border-t border-slate-200 dark:border-white/[0.08]">
           <div className="flex gap-4">
             <div className="bg-blue-600/10 p-3 rounded-xl h-fit">
