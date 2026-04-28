@@ -24,10 +24,10 @@ interface PDFModalProps {
   tipo: 'lease' | 'loan' | 'roofing'
   resumen: Record<string, string | number>   // datos auto de la app
   onGenerate: (cliente: ClienteData, consultor: ConsultorData) => Promise<void>
-  // Para LOAN: selector de plazo
-  plazos?: string[]
-  plazoSeleccionado?: string
-  onPlazoChange?: (p: string) => void
+  // Para LOAN: selector múltiple de modalidades
+  modalidades?: string[]
+  modalidadesSeleccionadas?: string[]
+  onModalidadesChange?: (m: string[]) => void
   // Para ROOFING: selector múltiple de planes
   planes?: string[]
   planesSeleccionados?: string[]
@@ -68,7 +68,7 @@ function Field({
 // ── componente ────────────────────────────────────────────────
 export function PDFModal({
   isOpen, onClose, tipo, resumen, onGenerate,
-  plazos, plazoSeleccionado, onPlazoChange,
+  modalidades, modalidadesSeleccionadas, onModalidadesChange,
   planes, planesSeleccionados, onPlanesChange,
 }: PDFModalProps) {
 
@@ -84,6 +84,14 @@ export function PDFModal({
   const handleGenerate = async () => {
     if (!cliente.nombre.trim() || !consultor.nombre.trim()) {
       setError('Nombre del cliente y consultor son requeridos.')
+      return
+    }
+    if (tipo === 'loan' && (modalidadesSeleccionadas?.length ?? 0) === 0) {
+      setError('Selecciona al menos una modalidad de cotización.')
+      return
+    }
+    if (tipo === 'roofing' && (planesSeleccionados?.length ?? 0) === 0) {
+      setError('Selecciona al menos un plan de sellado.')
       return
     }
     setError('')
@@ -163,32 +171,52 @@ export function PDFModal({
             </div>
           </section>
 
-          {/* ── SELECTOR PLAZO — solo LOAN ── */}
-          {tipo === 'loan' && plazos && (
+          {/* ── SELECTOR MODALIDADES — solo LOAN ── */}
+          {tipo === 'loan' && modalidades && (
             <section>
               <div style={{
                 fontSize: 13, fontWeight: 700, color: '#1a56c4',
                 borderBottom: '2px solid #F89B24', paddingBottom: 4, marginBottom: 12,
               }}>
-                Tipo de Financiamiento
+                Modalidad de Cotización (selección múltiple)
               </div>
-              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-                {plazos.map(p => (
-                  <button
-                    key={p}
-                    onClick={() => onPlazoChange?.(p)}
-                    style={{
-                      padding: '8px 18px', borderRadius: 8, fontSize: 13, cursor: 'pointer',
-                      border: `2px solid ${plazoSeleccionado === p ? '#1a56c4' : '#d0d9ef'}`,
-                      background: plazoSeleccionado === p ? '#1a56c4' : 'white',
-                      color: plazoSeleccionado === p ? 'white' : '#333',
-                      fontWeight: plazoSeleccionado === p ? 700 : 400,
-                    }}
-                  >
-                    {p}
-                  </button>
-                ))}
+              <div style={{ display: 'flex', gap: 10 }}>
+                {modalidades.map(m => {
+                  const selected = modalidadesSeleccionadas?.includes(m)
+                  const info: Record<string, { label: string; color: string }> = {
+                    wh:       { label: 'WH Financial', color: '#1a56c4' },
+                    oriental: { label: 'Oriental Bank', color: '#E07000' },
+                    cash:     { label: 'Cash',          color: '#0f8933' },
+                  }
+                  const { label, color } = info[m] ?? { label: m, color: '#888' }
+                  return (
+                    <button
+                      key={m}
+                      onClick={() => {
+                        const curr = modalidadesSeleccionadas ?? []
+                        onModalidadesChange?.(
+                          selected ? curr.filter(p => p !== m) : [...curr, m]
+                        )
+                      }}
+                      style={{
+                        flex: 1, padding: '10px 0', borderRadius: 8, fontSize: 13,
+                        cursor: 'pointer', fontWeight: 700,
+                        border: `2px solid ${selected ? color : '#d0d9ef'}`,
+                        background: selected ? color : 'white',
+                        color: selected ? 'white' : '#555',
+                        transition: 'all 0.15s',
+                      }}
+                    >
+                      {label}
+                    </button>
+                  )
+                })}
               </div>
+              {(modalidadesSeleccionadas?.length ?? 0) === 0 && (
+                <p style={{ fontSize: 11, color: '#e74c3c', marginTop: 6 }}>
+                  Selecciona al menos una modalidad.
+                </p>
+              )}
             </section>
           )}
 

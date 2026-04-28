@@ -1,25 +1,32 @@
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
 import type { ClienteData, ConsultorData } from '../components/PDFModal'
 
-// ── colores Windmar ────────────────────────────────────────────
-const NAVY   = rgb(0.051, 0.125, 0.314)   // #0d2050
-const BLUE   = rgb(0.102, 0.337, 0.769)   // #1a56c4
-const ORANGE = rgb(0.973, 0.608, 0.141)   // #F89B24
-const WHITE  = rgb(1, 1, 1)
-const LIGHT  = rgb(0.918, 0.953, 1.0)     // #ebf3ff
-const GRAY   = rgb(0.4, 0.4, 0.4)
-const DARK   = rgb(0.1, 0.1, 0.1)
-const BORDER = rgb(0.773, 0.831, 0.937)   // #c5d4ef
-const GREEN  = rgb(0.059, 0.600, 0.322)   // para badge WH
+// ── Colores ────────────────────────────────────────────────────
+const NAVY        = rgb(0.051, 0.125, 0.314)   // #0d2050
+const BLUE        = rgb(0.102, 0.337, 0.769)   // #1a56c4  ← WH Financial
+const ORANGE_ACC  = rgb(0.973, 0.608, 0.141)   // #F89B24  ← acento / Oriental Bank
+const ORANGE_OB   = rgb(0.941, 0.471, 0.000)   // #F07800  ← Oriental Bank header
+const GREEN_CASH  = rgb(0.059, 0.537, 0.200)   // #0f8933  ← Cash
+const WHITE       = rgb(1, 1, 1)
+const LIGHT_BLUE  = rgb(0.918, 0.953, 1.0)     // #ebf3ff
+const LIGHT_OB    = rgb(1.0, 0.949, 0.882)     // light orange
+const LIGHT_GREEN = rgb(0.878, 0.965, 0.882)   // light green
+const GRAY        = rgb(0.4, 0.4, 0.4)
+const DARK        = rgb(0.1, 0.1, 0.1)
+const BORDER      = rgb(0.773, 0.831, 0.937)   // #c5d4ef
+
+type PagoWH       = { years: number; amount: number; rate: number }
+type PagoOriental = { years: number; amount: number; rate: number; amountMax?: number; rateMax?: number }
 
 export interface LoanResumen {
   paneles: string
   baterias: string
   sistemaKW: number
-  financiera: string
   pronto: number
-  totalFinanciar: number
-  pagos: { years: number; amount: number; amountMax?: number; rate: number; rateMax?: number }[]
+  cashTotal: number                 // valor total del sistema (sin financiamiento)
+  modalidades: string[]             // ['wh', 'oriental', 'cash']
+  pagosWH: PagoWH[]
+  pagosOriental: PagoOriental[]
 }
 
 export async function generateLoanPDF(
@@ -36,7 +43,7 @@ export async function generateLoanPDF(
   const boldFont  = await outputDoc.embedFont(StandardFonts.HelveticaBold)
   const regFont   = await outputDoc.embedFont(StandardFonts.Helvetica)
 
-  const INSERT_AT = 1  // insertar como 2ª página (índice 1)
+  const INSERT_AT = 1
   const totalOrig = originalDoc.getPages().length
 
   if (INSERT_AT > 0) {
@@ -44,7 +51,6 @@ export async function generateLoanPDF(
     before.forEach(p => outputDoc.addPage(p))
   }
 
-  // Logo Windmar
   let logoImage: any = null
   try {
     const logoRes = await fetch('https://i.postimg.cc/6T5J2v2G/logo.png')
@@ -81,43 +87,42 @@ function drawCotizacionLoan(
   const M     = 36
   const dataW = width - M * 2
 
-  // ── Fondo blanco ──
+  // Fondo blanco
   rect(page, 0, 0, width, height, WHITE)
 
   // ── Header navy ──
   const headerH = 60
   rect(page, 0, height - headerH, width, headerH, NAVY)
-  rect(page, 0, height - headerH - 8, width * 0.58, 8, ORANGE)
-
+  rect(page, 0, height - headerH - 8, width * 0.58, 8, ORANGE_ACC)
   text(page, 'WINDMAR', 22, M, height - 22, bold, WHITE)
-  text(page, 'ENERGY by Qcells', 9, M, height - 38, reg, ORANGE)
+  text(page, 'ENERGY by Qcells', 9, M, height - 38, reg, ORANGE_ACC)
 
-  // Logo Windmar (derecha, grande, centrado verticalmente)
   if (logoImage) {
     const lDims = logoImage.scale(0.34)
-    const lx    = width - lDims.width - 20
-    const ly    = height - headerH + Math.round((headerH - lDims.height) / 2)
-    page.drawImage(logoImage, { x: lx, y: ly, width: lDims.width, height: lDims.height })
+    page.drawImage(logoImage, {
+      x: width - lDims.width - 20,
+      y: height - headerH + Math.round((headerH - lDims.height) / 2),
+      width: lDims.width, height: lDims.height,
+    })
   }
 
   // ── Título ──
   text(page, 'Cotizacion', 22, M, height - headerH - 26, bold, BLUE)
-
   const today = new Date().toLocaleDateString('es-PR')
 
   // ── Bloque cliente / consultor ──
   const colW  = Math.round(width * 0.46)
   const col2X = M + colW + 10
   const col2W = width - col2X - M
+  const cY    = height - headerH - 60
 
-  const cY = height - headerH - 60
-  text(page, clean(cliente.nombre),   11, M, cY,       bold, DARK)
-  text(page, clean(cliente.direccion),  9, M, cY - 16, reg,  GRAY)
+  text(page, clean(cliente.nombre),    11, M, cY,       bold, DARK)
+  text(page, clean(cliente.direccion),  9, M, cY - 16,  reg,  GRAY)
   text(page, `${clean(cliente.ciudad)}, PR ${cliente.zipCode}`, 9, M, cY - 29, reg, GRAY)
-  text(page, cliente.telefono,          9, M, cY - 42, reg,  GRAY)
-  text(page, clean(cliente.email),      9, M, cY - 55, reg,  BLUE)
+  text(page, cliente.telefono,          9, M, cY - 42,  reg,  GRAY)
+  text(page, clean(cliente.email),      9, M, cY - 55,  reg,  BLUE)
 
-  const rowH = 20
+  const rowH  = 20
   const tRows: [string, string][] = [
     ['Cotizacion No.', `001   Fecha: ${today}`],
     ['Consultor:', clean(consultor.nombre)],
@@ -127,155 +132,96 @@ function drawCotizacionLoan(
   const tTop = cY + 6
   tRows.forEach(([lbl, val], i) => {
     const ry = tTop - i * rowH
-    if (i % 2 === 0) rect(page, col2X, ry - rowH + 5, col2W, rowH, LIGHT)
-    text(page, lbl, 8, col2X + 5, ry - 8, bold, BLUE)
+    if (i % 2 === 0) rect(page, col2X, ry - rowH + 5, col2W, rowH, LIGHT_BLUE)
+    text(page, lbl, 8, col2X + 5,  ry - 8, bold, BLUE)
     text(page, val, 8, col2X + 84, ry - 8, reg,  DARK)
   })
   page.drawRectangle({
-    x: col2X,
-    y: tTop - tRows.length * rowH - 2,
-    width:  col2W,
-    height: tRows.length * rowH + rowH,
-    borderColor: BORDER,
-    borderWidth: 0.6,
+    x: col2X, y: tTop - tRows.length * rowH - 2,
+    width: col2W, height: tRows.length * rowH + rowH,
+    borderColor: BORDER, borderWidth: 0.6,
   })
 
-  // ── Sección: Detalles del Sistema Solar ──
+  // ── Detalles del Sistema Solar ──
   const secY = height - headerH - 168
   text(page, 'Detalles del Sistema Solar', 13, M, secY, bold, BLUE)
-  page.drawLine({
-    start: { x: M, y: secY - 5 },
-    end:   { x: M + 178, y: secY - 5 },
-    thickness: 2, color: ORANGE,
-  })
+  page.drawLine({ start: { x: M, y: secY - 5 }, end: { x: M + 178, y: secY - 5 }, thickness: 2, color: ORANGE_ACC })
 
   const sysRows: [string, string][] = [
     ['Cantidad de Paneles:', clean(resumen.paneles)],
     ['Cantidad de Baterias:', clean(resumen.baterias)],
-    ['Tamano del Sistema:',   `${resumen.sistemaKW} KW`],
+    ['Tamano del Sistema:', `${resumen.sistemaKW} KW`],
   ]
-  const rH = 20
+  const rH   = 18
   const valX = 212
-  let sy = secY - 30
+  let sy = secY - 28
+
   sysRows.forEach(([lbl, val], i) => {
-    if (i % 2 === 0) rect(page, M, sy - 6, dataW, rH, LIGHT)
-    text(page, lbl, 9, M + 8, sy + 3, bold, BLUE)
-    text(page, val, 9, valX,  sy + 3, reg,  DARK)
-    sy -= rH + 4
+    if (i % 2 === 0) rect(page, M, sy - 5, dataW, rH, LIGHT_BLUE)
+    text(page, lbl, 9, M + 8, sy + 2, bold, BLUE)
+    text(page, val, 9, valX,  sy + 2, reg,  DARK)
+    sy -= rH + 3
   })
 
-  page.drawLine({
-    start: { x: M, y: sy + 2 },
-    end:   { x: width - M, y: sy + 2 },
-    thickness: 0.5, color: BORDER,
-  })
-  sy -= 16
+  page.drawLine({ start: { x: M, y: sy + 2 }, end: { x: M + dataW, y: sy + 2 }, thickness: 0.5, color: BORDER })
+  sy -= 14
 
-  // ── Sección: Opciones de Financiamiento ──
-  text(page, 'Opciones de Financiamiento', 13, M, sy, bold, BLUE)
-  page.drawLine({
-    start: { x: M, y: sy - 5 },
-    end:   { x: M + 185, y: sy - 5 },
-    thickness: 2, color: ORANGE,
-  })
-  sy -= 20
+  // ── Opciones de Cotizacion ──
+  text(page, 'Opciones de Cotizacion', 13, M, sy, bold, BLUE)
+  page.drawLine({ start: { x: M, y: sy - 5 }, end: { x: M + 155, y: sy - 5 }, thickness: 2, color: ORANGE_ACC })
+  sy -= 22
 
-  // Badge financiera
-  const isWH = resumen.financiera === 'WH Financial'
-  const badgeColor = isWH ? GREEN : NAVY
-  rect(page, M, sy - 4, 110, 18, badgeColor)
-  text(page, clean(resumen.financiera).toUpperCase(), 8, M + 8, sy + 3, bold, WHITE)
-  sy -= 24
-
-  // Filas de resumen financiero
+  // Pronto Pago + Total a Financiar (compartido)
+  const totalFinanciar = Math.max(resumen.cashTotal - resumen.pronto, 0)
   const finRows: [string, string][] = [
     ['Pronto Pago:', `$${fmt(resumen.pronto)}`],
-    ['Total a Financiar:', `$${fmt(resumen.totalFinanciar)}`],
+    ['Total a Financiar:', `$${fmt(totalFinanciar)}`],
   ]
   finRows.forEach(([lbl, val], i) => {
-    if (i % 2 === 0) rect(page, M, sy - 6, dataW, rH, LIGHT)
-    text(page, lbl, 9, M + 8, sy + 3, bold, DARK)
-    text(page, val, 9, valX,  sy + 3, bold, DARK)
-    sy -= rH + 4
+    if (i % 2 === 0) rect(page, M, sy - 5, dataW, 17, LIGHT_BLUE)
+    text(page, lbl, 9, M + 8, sy + 2, bold, DARK)
+    text(page, val, 9, valX,  sy + 2, bold, DARK)
+    sy -= 20
   })
+  page.drawLine({ start: { x: M, y: sy + 2 }, end: { x: M + dataW, y: sy + 2 }, thickness: 0.5, color: BORDER })
+  sy -= 12
 
-  page.drawLine({
-    start: { x: M, y: sy + 2 },
-    end:   { x: width - M, y: sy + 2 },
-    thickness: 0.5, color: BORDER,
-  })
-  sy -= 16
-
-  // ── Tabla de pagos mensuales ──
-  text(page, 'Mensualidades Estimadas', 10, M, sy, bold, BLUE)
-  sy -= 18
-
-  // Cabecera tabla
-  const c1 = M + 8, c2 = M + 90, c3 = M + 200
-  rect(page, M, sy - 4, dataW, 16, NAVY)
-  text(page, 'Plazo',       8, c1, sy + 3, bold, WHITE)
-  text(page, 'APR',         8, c2, sy + 3, bold, WHITE)
-  text(page, 'Mensualidad', 8, c3, sy + 3, bold, WHITE)
-  sy -= 20
-
-  resumen.pagos.forEach(({ years, rate, amount, rateMax, amountMax }, i) => {
-    if (i % 2 === 0) rect(page, M, sy - 6, dataW, rH, LIGHT)
-    const aprStr = rateMax
-      ? `${(rate * 100).toFixed(2)}% - ${(rateMax * 100).toFixed(2)}%`
-      : `${(rate * 100).toFixed(2)}%`
-    const montoStr = amountMax
-      ? `$${fmt(amount)} - $${fmt(amountMax)}`
-      : `$${fmt(amount)}`
-    text(page, `${years} anos`, 9, c1, sy + 3, reg,  DARK)
-    text(page, aprStr,          9, c2, sy + 3, reg,  DARK)
-    text(page, montoStr,        9, c3, sy + 3, bold, DARK)
-    sy -= rH + 4
-  })
-
-  if (resumen.pagos.length === 0) {
-    text(page, 'No hay opciones disponibles con la seleccion actual.', 9, M + 8, sy + 3, reg, GRAY)
-    sy -= rH + 4
+  // ── CASH ──────────────────────────────────────────────────────
+  if (resumen.modalidades.includes('cash')) {
+    // Badge verde + precio prominente
+    rect(page, M, sy - 2, 110, 16, GREEN_CASH)
+    text(page, 'PRECIO AL CONTADO', 8, M + 6, sy + 5, bold, WHITE)
+    text(page, `$${fmt(resumen.cashTotal)}`, 13, M + 130, sy + 2, bold, GREEN_CASH)
+    sy -= 22
+    // Fila info
+    rect(page, M, sy - 3, dataW, 15, LIGHT_GREEN)
+    text(page, 'Valor total del sistema al contado, sin cargos de financiamiento.', 7.5, M + 8, sy + 2, reg, GRAY)
+    sy -= 18
+    page.drawLine({ start: { x: M, y: sy + 2 }, end: { x: M + dataW, y: sy + 2 }, thickness: 0.5, color: BORDER })
+    sy -= 10
   }
 
-  text(page, '* Mensualidades son estimados. Pueden variar segun aprobacion.', 7.5, M + 8, sy, reg, GRAY)
+  // ── WH FINANCIAL ─────────────────────────────────────────────
+  if (resumen.modalidades.includes('wh')) {
+    sy = drawPaymentSection(page, sy, M, dataW, bold, reg,
+      'WH FINANCIAL', BLUE, LIGHT_BLUE, resumen.pagosWH)
+  }
 
-  // ── CTA ──
-  const ctaY = sy - 32
-  text(page, 'Cotiza hoy y empieza a ahorrar con energia confiable.', 13, M, ctaY, reg, BLUE)
-  text(page, 'Accesible, simple y rapido.', 15, M, ctaY - 19, bold, NAVY)
-
-  // Badge financiera (CTA)
-  const bY = ctaY - 48
-  rect(page, M, bY - 5, isWH ? 110 : 80, 22, NAVY)
-  text(page, isWH ? 'WH FINANCIAL' : 'ORIENTAL BANK', 8, M + 8, bY + 5, bold, WHITE)
-
-  // ── Beneficios ──
-  const benY = ctaY - 80
-  const benW = dataW / 3
-  const bens = [
-    'Aprobacion rapida y flexible',
-    'Garantia, instalacion y servicio incluidos',
-    'Servicio al cliente 24/7',
-  ]
-  bens.forEach((b, i) => {
-    text(page, b, 8, M + 4 + i * benW, benY, i === 2 ? bold : reg, i === 2 ? NAVY : GRAY)
-    if (i < 2) page.drawLine({
-      start: { x: M + (i + 1) * benW, y: benY + 12 },
-      end:   { x: M + (i + 1) * benW, y: benY - 8 },
-      thickness: 0.5, color: GRAY,
-    })
-  })
+  // ── ORIENTAL BANK ─────────────────────────────────────────────
+  if (resumen.modalidades.includes('oriental')) {
+    sy = drawPaymentSection(page, sy, M, dataW, bold, reg,
+      'ORIENTAL BANK', ORANGE_OB, LIGHT_OB, resumen.pagosOriental)
+  }
 
   // ── Footer ──
   const footerH = 60
   rect(page, 0, 0, width, footerH, NAVY)
-  rect(page, 0, footerH - 3, width, 3, ORANGE)
-  rect(page, 0, 0, 4, footerH, ORANGE)
+  rect(page, 0, footerH - 3, width, 3, ORANGE_ACC)
+  rect(page, 0, 0, 4, footerH, ORANGE_ACC)
 
   if (logoImage) {
     const fD = logoImage.scale(0.28)
-    const fY = Math.round((footerH - fD.height) / 2)
-    page.drawImage(logoImage, { x: 14, y: fY, width: fD.width, height: fD.height })
+    page.drawImage(logoImage, { x: 14, y: Math.round((footerH - fD.height) / 2), width: fD.width, height: fD.height })
   }
 
   page.drawLine({ start: { x: 230, y: 50 }, end: { x: 230, y: 8 }, thickness: 0.5, color: rgb(0.5, 0.5, 0.7) })
@@ -289,7 +235,58 @@ function drawCotizacionLoan(
   text(page, 'San Juan, 00920, Puerto Rico.', 7, 402, 18, reg, rgb(0.8, 0.8, 0.9))
 }
 
-// ── helpers ───────────────────────────────────────────────────
+// ── Sección de pagos mensuales (WH o Oriental) ─────────────────
+function drawPaymentSection(
+  page: any, sy: number, M: number, dataW: number,
+  bold: any, reg: any,
+  title: string, headerColor: any, lightBg: any,
+  pagos: { years: number; amount: number; rate: number; amountMax?: number; rateMax?: number }[],
+): number {
+  const c1 = M + 8
+  const c2 = M + 90
+  const c3 = M + 200
+
+  // Badge header de color
+  rect(page, M, sy - 2, 120, 16, headerColor)
+  text(page, title, 8, M + 6, sy + 5, bold, WHITE)
+  sy -= 20
+
+  // Cabecera tabla (siempre navy)
+  rect(page, M, sy - 3, dataW, 15, NAVY)
+  text(page, 'Plazo',       8, c1, sy + 3, bold, WHITE)
+  text(page, 'APR',         8, c2, sy + 3, bold, WHITE)
+  text(page, 'Mensualidad', 8, c3, sy + 3, bold, WHITE)
+  sy -= 19
+
+  if (pagos.length === 0) {
+    text(page, 'No hay opciones disponibles con la configuracion actual.', 8, M + 8, sy + 2, reg, GRAY)
+    sy -= 16
+  } else {
+    pagos.forEach(({ years, rate, amount, rateMax, amountMax }, i) => {
+      if (i % 2 === 0) rect(page, M, sy - 3, dataW, 16, lightBg)
+      const aprStr = rateMax
+        ? `${(rate * 100).toFixed(2)}% - ${(rateMax * 100).toFixed(2)}%`
+        : `${(rate * 100).toFixed(2)}%`
+      const montoStr = amountMax
+        ? `$${fmt(amount)} - $${fmt(amountMax)}`
+        : `$${fmt(amount)}`
+      text(page, `${years} Anos`, 8.5, c1, sy + 2, reg,  DARK)
+      text(page, aprStr,          8.5, c2, sy + 2, reg,  DARK)
+      text(page, montoStr,        8.5, c3, sy + 2, bold, DARK)
+      sy -= 19
+    })
+  }
+
+  text(page, '* Mensualidades son estimados. Pueden variar segun aprobacion.', 7, M + 8, sy + 2, reg, GRAY)
+  sy -= 12
+
+  page.drawLine({ start: { x: M, y: sy + 2 }, end: { x: M + dataW, y: sy + 2 }, thickness: 0.5, color: BORDER })
+  sy -= 10
+
+  return sy
+}
+
+// ── Helpers ────────────────────────────────────────────────────
 function rect(page: any, x: number, y: number, w: number, h: number, color: any) {
   page.drawRectangle({ x, y, width: w, height: h, color })
 }

@@ -59,17 +59,22 @@ export default function App() {
     }
   }, [isDarkMode]);
 
-  const results = useMemo(() => calculateQuote(inputs), [inputs]);
+  const results         = useMemo(() => calculateQuote(inputs), [inputs]);
+  const resultsWH       = useMemo(() => calculateQuote({ ...inputs, financing: 'WH' }), [inputs]);
+  const resultsOriental = useMemo(() => calculateQuote({ ...inputs, financing: 'ORIENTAL' }), [inputs]);
+
   const [pdfModalAbierto, setPdfModalAbierto] = useState(false);
+  const [modalidadesParaPDF, setModalidadesParaPDF] = useState<string[]>(['wh', 'oriental', 'cash']);
 
   const loanResumen = {
-    paneles:       inputs.panels > 0 ? `${inputs.panels} x QCells Q PEAK DUO BLK ML-G10+ 410` : 'Sin Paneles',
-    baterias:      inputs.batteries > 0 ? `${inputs.batteries} x Tesla Powerwall 3` : 'Sin Baterias',
-    sistemaKW:     Number((inputs.panels * 410 / 1000).toFixed(2)),
-    financiera:    inputs.financing === 'WH' ? 'WH Financial' : 'Oriental Bank',
-    pronto:        inputs.manualPronto,
-    totalFinanciar: results.valorFinanciado,
-    pagos:         results.monthlyPayments,
+    paneles:      inputs.panels > 0    ? `${inputs.panels} x QCells Q PEAK DUO BLK ML-G10+ 410` : 'Sin Paneles',
+    baterias:     inputs.batteries > 0 ? `${inputs.batteries} x Tesla Powerwall 3`               : 'Sin Baterias',
+    sistemaKW:    Number((inputs.panels * 410 / 1000).toFixed(2)),
+    pronto:       inputs.manualPronto,
+    cashTotal:    results.cashValue,
+    modalidades:  modalidadesParaPDF,
+    pagosWH:      resultsWH.monthlyPayments,
+    pagosOriental: resultsOriental.monthlyPayments,
   };
 
   const handleGenerateLoanPDF = async (cliente: ClienteData, consultor: ConsultorData) => {
@@ -635,13 +640,16 @@ export default function App() {
         onClose={() => setPdfModalAbierto(false)}
         tipo="loan"
         resumen={{
-          'Paneles':          loanResumen.paneles,
-          'Baterias':         loanResumen.baterias,
-          'Sistema':          `${loanResumen.sistemaKW} KW`,
-          'Financiera':       loanResumen.financiera,
-          'Pronto Pago':      `$${loanResumen.pronto.toLocaleString()}`,
-          'Total a Financiar': `$${loanResumen.totalFinanciar.toLocaleString()}`,
+          'Paneles':           loanResumen.paneles,
+          'Baterias':          loanResumen.baterias,
+          'Sistema':           `${loanResumen.sistemaKW} KW`,
+          'Pronto Pago':       `$${loanResumen.pronto.toLocaleString()}`,
+          'Valor al Contado':  `$${loanResumen.cashTotal.toLocaleString()}`,
+          'Total a Financiar': `$${Math.max(loanResumen.cashTotal - loanResumen.pronto, 0).toLocaleString()}`,
         }}
+        modalidades={['wh', 'oriental', 'cash']}
+        modalidadesSeleccionadas={modalidadesParaPDF}
+        onModalidadesChange={setModalidadesParaPDF}
         onGenerate={handleGenerateLoanPDF}
       />
 
