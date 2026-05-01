@@ -17,6 +17,72 @@ const BORDER      = rgb(0.773, 0.831, 0.937)   // #c5d4ef
 
 const IVU_RATE = 1.115                          // 11.5% Puerto Rico IVU
 
+// ── Diccionario bilingüe ───────────────────────────────────────
+const LABELS = {
+  es: {
+    title:         'Cotización',
+    quoteNo:       'Cotización No.',
+    consultant:    'Consultor:',
+    phone:         'Teléfono:',
+    email:         'Correo:',
+    solarDetails:  'Detalles del Sistema Solar',
+    panelsLbl:     'Cantidad de Paneles:',
+    batteriesLbl:  'Cantidad de Baterías:',
+    systemLbl:     'Tamaño del Sistema:',
+    quoteOptions:  'Opciones de Cotización',
+    downPayment:   'Pronto Pago:',
+    totalFinance:  'Total a Financiar:',
+    cashRowDesc:   'Sistema Solar',
+    cashColDesc:   'Descripción',
+    cashColTotal:  'Cash Total',
+    cashColNoTax:  'Valor sin IVU',
+    cashColTax:    'Solo IVU (11.5%)',
+    cashNote:      '* Precio al contado. No incluye cargos de financiamiento.',
+    payColTerm:    'Plazo',
+    payColAPR:     'APR',
+    payColMonthly: 'Mensualidad',
+    payNote:       '* Mensualidades son estimados. Pueden variar según aprobación.',
+    noOptions:     'No hay opciones disponibles con la configuración actual.',
+    years:         'Años',
+    contact:       'Contáctanos',
+    address:       'Dirección',
+    energySub:     'ENERGY by Qcells',
+    dateLabel:     'Fecha:',
+  },
+  en: {
+    title:         'Quote',
+    quoteNo:       'Quote No.',
+    consultant:    'Consultant:',
+    phone:         'Phone:',
+    email:         'Email:',
+    solarDetails:  'Solar System Details',
+    panelsLbl:     'Number of Panels:',
+    batteriesLbl:  'Number of Batteries:',
+    systemLbl:     'System Size:',
+    quoteOptions:  'Quote Options',
+    downPayment:   'Down Payment:',
+    totalFinance:  'Total to Finance:',
+    cashRowDesc:   'Solar System',
+    cashColDesc:   'Description',
+    cashColTotal:  'Cash Total',
+    cashColNoTax:  'Price w/o Tax',
+    cashColTax:    'Tax Only (11.5%)',
+    cashNote:      '* Cash price. Does not include financing charges.',
+    payColTerm:    'Term',
+    payColAPR:     'APR',
+    payColMonthly: 'Monthly',
+    payNote:       '* Monthly payments are estimates. May vary upon approval.',
+    noOptions:     'No options available with current configuration.',
+    years:         'Years',
+    contact:       'Contact Us',
+    address:       'Address',
+    energySub:     'ENERGY by Qcells',
+    dateLabel:     'Date:',
+  },
+} as const
+
+type Lang = keyof typeof LABELS
+
 type PagoWH       = { years: number; amount: number; rate: number }
 type PagoOriental = { years: number; amount: number; rate: number; amountMax?: number; rateMax?: number }
 
@@ -29,6 +95,7 @@ export interface LoanResumen {
   modalidades: string[]             // ['wh', 'oriental', 'cash']
   pagosWH: PagoWH[]
   pagosOriental: PagoOriental[]
+  idioma: Lang                      // 'es' | 'en'
 }
 
 export async function generateLoanPDF(
@@ -73,7 +140,8 @@ export async function generateLoanPDF(
   }
 
   const bytes = await outputDoc.save()
-  downloadPDF(bytes, `Cotizacion-Loan-${clean(cliente.nombre)}.pdf`)
+  const lang  = resumen.idioma === 'en' ? 'Quote' : 'Cotizacion'
+  downloadPDF(bytes, `${lang}-Loan-${clean(cliente.nombre)}.pdf`)
 }
 
 function drawCotizacionLoan(
@@ -88,6 +156,7 @@ function drawCotizacionLoan(
 ) {
   const M     = 36
   const dataW = width - M * 2
+  const L     = LABELS[resumen.idioma]
 
   // Fondo blanco
   rect(page, 0, 0, width, height, WHITE)
@@ -97,7 +166,7 @@ function drawCotizacionLoan(
   rect(page, 0, height - headerH, width, headerH, NAVY)
   rect(page, 0, height - headerH - 8, width * 0.58, 8, ORANGE_ACC)
   text(page, 'WINDMAR', 22, M, height - 22, bold, WHITE)
-  text(page, 'ENERGY by Qcells', 9, M, height - 38, reg, ORANGE_ACC)
+  text(page, L.energySub, 9, M, height - 38, reg, ORANGE_ACC)
 
   if (logoImage) {
     const lDims = logoImage.scale(0.34)
@@ -109,8 +178,8 @@ function drawCotizacionLoan(
   }
 
   // ── Título ──
-  text(page, 'Cotización', 22, M, height - headerH - 26, bold, BLUE)
-  const today = new Date().toLocaleDateString('es-PR')
+  text(page, L.title, 22, M, height - headerH - 26, bold, BLUE)
+  const today = new Date().toLocaleDateString(resumen.idioma === 'en' ? 'en-US' : 'es-PR')
 
   // ── Bloque cliente / consultor ──
   const colW  = Math.round(width * 0.46)
@@ -126,10 +195,10 @@ function drawCotizacionLoan(
 
   const rowH  = 20
   const tRows: [string, string][] = [
-    ['Cotización No.', `001   Fecha: ${today}`],
-    ['Consultor:', clean(consultor.nombre)],
-    ['Teléfono:', consultor.telefono],
-    ['Correo:', clean(consultor.email)],
+    [L.quoteNo,    `001   ${L.dateLabel} ${today}`],
+    [L.consultant, clean(consultor.nombre)],
+    [L.phone,      consultor.telefono],
+    [L.email,      clean(consultor.email)],
   ]
   const tTop = cY + 6
   tRows.forEach(([lbl, val], i) => {
@@ -146,13 +215,13 @@ function drawCotizacionLoan(
 
   // ── Detalles del Sistema Solar ──
   const secY = height - headerH - 168
-  text(page, 'Detalles del Sistema Solar', 13, M, secY, bold, BLUE)
+  text(page, L.solarDetails, 13, M, secY, bold, BLUE)
   page.drawLine({ start: { x: M, y: secY - 5 }, end: { x: M + 178, y: secY - 5 }, thickness: 2, color: ORANGE_ACC })
 
   const sysRows: [string, string][] = [
-    ['Cantidad de Paneles:', clean(resumen.paneles)],
-    ['Cantidad de Baterías:', clean(resumen.baterias)],
-    ['Tamaño del Sistema:', `${resumen.sistemaKW} KW`],
+    [L.panelsLbl,    clean(resumen.paneles)],
+    [L.batteriesLbl, clean(resumen.baterias)],
+    [L.systemLbl,    `${resumen.sistemaKW} KW`],
   ]
   const rH   = 15
   const rGap = 3
@@ -170,15 +239,15 @@ function drawCotizacionLoan(
   sy -= 12
 
   // ── Opciones de Cotización ──
-  text(page, 'Opciones de Cotización', 13, M, sy, bold, BLUE)
+  text(page, L.quoteOptions, 13, M, sy, bold, BLUE)
   page.drawLine({ start: { x: M, y: sy - 5 }, end: { x: M + 160, y: sy - 5 }, thickness: 2, color: ORANGE_ACC })
   sy -= 20
 
   // Pronto Pago + Total a Financiar (compartido)
   const totalFinanciar = Math.max(resumen.cashTotal - resumen.pronto, 0)
   const finRows: [string, string][] = [
-    ['Pronto Pago:', `$${fmt(resumen.pronto)}`],
-    ['Total a Financiar:', `$${fmt(totalFinanciar)}`],
+    [L.downPayment,  `$${fmt(resumen.pronto)}`],
+    [L.totalFinance, `$${fmt(totalFinanciar)}`],
   ]
   finRows.forEach(([lbl, val], i) => {
     if (i % 2 === 0) rect(page, M, sy - 4, dataW, 16, LIGHT_BLUE)
@@ -194,34 +263,30 @@ function drawCotizacionLoan(
     const sinIVU  = resumen.cashTotal / IVU_RATE
     const soloIVU = resumen.cashTotal - sinIVU
 
-    // Posiciones de columnas
-    const cC1 = M + 8     // Descripción
-    const cC2 = M + 170   // Cash Total
-    const cC3 = M + 315   // Valor sin IVU
-    const cC4 = M + 445   // Solo IVU
+    const cC1 = M + 8
+    const cC2 = M + 170
+    const cC3 = M + 315
+    const cC4 = M + 445
 
-    // ── Barra de título verde ancho completo ──
     rect(page, M, sy - 2, dataW, 17, GREEN_CASH)
     text(page, 'CASH', 9, M + 8, sy + 5, bold, WHITE)
     sy -= 21
 
-    // ── Cabecera de columnas (navy) ──
     rect(page, M, sy - 3, dataW, 14, NAVY)
-    text(page, 'Descripción',     7.5, cC1, sy + 2, bold, WHITE)
-    text(page, 'Cash Total',           7.5, cC2, sy + 2, bold, WHITE)
-    text(page, 'Valor sin IVU',        7.5, cC3, sy + 2, bold, WHITE)
-    text(page, 'Solo IVU (11.5%)',     7.5, cC4, sy + 2, bold, WHITE)
+    text(page, L.cashColDesc,   7.5, cC1, sy + 2, bold, WHITE)
+    text(page, L.cashColTotal,  7.5, cC2, sy + 2, bold, WHITE)
+    text(page, L.cashColNoTax,  7.5, cC3, sy + 2, bold, WHITE)
+    text(page, L.cashColTax,    7.5, cC4, sy + 2, bold, WHITE)
     sy -= 18
 
-    // ── Fila de datos ──
     rect(page, M, sy - 3, dataW, 16, LIGHT_GREEN)
-    text(page, 'Sistema Solar',              8.5, cC1, sy + 2, reg,  DARK)
+    text(page, L.cashRowDesc,               8.5, cC1, sy + 2, reg,  DARK)
     text(page, `$${fmt(resumen.cashTotal)}`, 8.5, cC2, sy + 2, bold, GREEN_CASH)
     text(page, `$${fmt(sinIVU)}`,            8.5, cC3, sy + 2, reg,  DARK)
     text(page, `$${fmt(soloIVU)}`,           8.5, cC4, sy + 2, reg,  DARK)
     sy -= 19
 
-    text(page, '* Precio al contado. No incluye cargos de financiamiento.', 7, M + 8, sy + 2, reg, GRAY)
+    text(page, L.cashNote, 7, M + 8, sy + 2, reg, GRAY)
     sy -= 11
 
     page.drawLine({ start: { x: M, y: sy + 2 }, end: { x: M + dataW, y: sy + 2 }, thickness: 0.5, color: BORDER })
@@ -231,13 +296,13 @@ function drawCotizacionLoan(
   // ── WH FINANCIAL ─────────────────────────────────────────────
   if (resumen.modalidades.includes('wh')) {
     sy = drawPaymentSection(page, sy, M, dataW, bold, reg,
-      'WH FINANCIAL', BLUE, LIGHT_BLUE, resumen.pagosWH)
+      'WH FINANCIAL', BLUE, LIGHT_BLUE, resumen.pagosWH, L)
   }
 
   // ── ORIENTAL BANK ─────────────────────────────────────────────
   if (resumen.modalidades.includes('oriental')) {
     sy = drawPaymentSection(page, sy, M, dataW, bold, reg,
-      'ORIENTAL BANK', ORANGE_OB, LIGHT_OB, resumen.pagosOriental)
+      'ORIENTAL BANK', ORANGE_OB, LIGHT_OB, resumen.pagosOriental, L)
   }
 
   // ── Footer ──
@@ -252,12 +317,12 @@ function drawCotizacionLoan(
   }
 
   page.drawLine({ start: { x: 230, y: 50 }, end: { x: 230, y: 8 }, thickness: 0.5, color: rgb(0.5, 0.5, 0.7) })
-  text(page, 'Contáctanos', 7, 242, 44, bold, WHITE)
+  text(page, L.contact, 7, 242, 44, bold, WHITE)
   text(page, 'ventas@windmarhome.com', 7, 242, 30, reg, rgb(0.8, 0.8, 0.9))
   text(page, '(787) 395-7766', 7, 242, 18, reg, rgb(0.8, 0.8, 0.9))
 
   page.drawLine({ start: { x: 390, y: 50 }, end: { x: 390, y: 8 }, thickness: 0.5, color: rgb(0.5, 0.5, 0.7) })
-  text(page, 'Dirección', 7, 402, 44, bold, WHITE)
+  text(page, L.address, 7, 402, 44, bold, WHITE)
   text(page, '1255 Avenida F.D. Roosevelt,', 7, 402, 30, reg, rgb(0.8, 0.8, 0.9))
   text(page, 'San Juan, 00920, Puerto Rico.', 7, 402, 18, reg, rgb(0.8, 0.8, 0.9))
 }
@@ -268,25 +333,24 @@ function drawPaymentSection(
   bold: any, reg: any,
   title: string, headerColor: any, lightBg: any,
   pagos: { years: number; amount: number; rate: number; amountMax?: number; rateMax?: number }[],
+  L: typeof LABELS['es'],
 ): number {
   const c1 = M + 8
   const c2 = M + 110
   const c3 = M + 235
 
-  // ── Barra de título ancho completo ──
   rect(page, M, sy - 2, dataW, 17, headerColor)
   text(page, title, 9, M + 8, sy + 5, bold, WHITE)
   sy -= 21
 
-  // ── Cabecera tabla (navy) ──
   rect(page, M, sy - 3, dataW, 14, NAVY)
-  text(page, 'Plazo',       7.5, c1, sy + 2, bold, WHITE)
-  text(page, 'APR',         7.5, c2, sy + 2, bold, WHITE)
-  text(page, 'Mensualidad', 7.5, c3, sy + 2, bold, WHITE)
+  text(page, L.payColTerm,    7.5, c1, sy + 2, bold, WHITE)
+  text(page, L.payColAPR,     7.5, c2, sy + 2, bold, WHITE)
+  text(page, L.payColMonthly, 7.5, c3, sy + 2, bold, WHITE)
   sy -= 18
 
   if (pagos.length === 0) {
-    text(page, 'No hay opciones disponibles con la configuración actual.', 8, M + 8, sy + 2, reg, GRAY)
+    text(page, L.noOptions, 8, M + 8, sy + 2, reg, GRAY)
     sy -= 15
   } else {
     pagos.forEach(({ years, rate, amount, rateMax, amountMax }, i) => {
@@ -297,14 +361,14 @@ function drawPaymentSection(
       const montoStr = amountMax
         ? `$${fmt(amount)} - $${fmt(amountMax)}`
         : `$${fmt(amount)}`
-      text(page, `${years} Años`, 8.5, c1, sy + 2, reg,  DARK)
-      text(page, aprStr,               8.5, c2, sy + 2, reg,  DARK)
-      text(page, montoStr,             8.5, c3, sy + 2, bold, DARK)
+      text(page, `${years} ${L.years}`, 8.5, c1, sy + 2, reg,  DARK)
+      text(page, aprStr,                8.5, c2, sy + 2, reg,  DARK)
+      text(page, montoStr,              8.5, c3, sy + 2, bold, DARK)
       sy -= 16
     })
   }
 
-  text(page, '* Mensualidades son estimados. Pueden variar según aprobación.', 7, M + 8, sy + 2, reg, GRAY)
+  text(page, L.payNote, 7, M + 8, sy + 2, reg, GRAY)
   sy -= 11
 
   page.drawLine({ start: { x: M, y: sy + 2 }, end: { x: M + dataW, y: sy + 2 }, thickness: 0.5, color: BORDER })

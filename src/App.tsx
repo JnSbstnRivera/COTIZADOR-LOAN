@@ -65,6 +65,7 @@ export default function App() {
 
   const [pdfModalAbierto, setPdfModalAbierto] = useState(false);
   const [modalidadesParaPDF, setModalidadesParaPDF] = useState<string[]>(['wh', 'oriental', 'cash']);
+  const [idiomaParaPDF, setIdiomaParaPDF] = useState<'es' | 'en'>('es');
 
   const loanResumen = {
     paneles:      inputs.panels > 0    ? `${inputs.panels} x QCells Q PEAK DUO BLK ML-G10+ 410` : 'Sin Paneles',
@@ -73,6 +74,7 @@ export default function App() {
     pronto:       inputs.manualPronto,
     cashTotal:    results.cashValue,
     modalidades:  modalidadesParaPDF,
+    idioma:       idiomaParaPDF,
     pagosWH:      resultsWH.monthlyPayments,
     pagosOriental: resultsOriental.monthlyPayments,
   };
@@ -267,7 +269,35 @@ export default function App() {
         >
           {/* Financing Selector - Visual Redesign */}
           <section className="space-y-3">
-            <h3 className="text-[10px] font-black text-wh-grey uppercase tracking-[0.2em] ml-1">Institución Financiera</h3>
+            <div className="flex items-center justify-between px-1">
+              <h3 className="text-[10px] font-black text-wh-grey uppercase tracking-[0.2em]">Institución Financiera</h3>
+              {/* Toggle idioma del PDF */}
+              <div className="flex items-center gap-2">
+                <span className="text-[9px] font-black text-wh-grey uppercase tracking-widest hidden sm:block">PDF</span>
+                <div className="flex rounded-xl overflow-hidden border border-slate-200 dark:border-white/[0.08] shadow-sm">
+                  <button
+                    onClick={() => setIdiomaParaPDF('es')}
+                    className={`px-3 py-1.5 text-[10px] font-black uppercase tracking-wider transition-colors ${
+                      idiomaParaPDF === 'es'
+                        ? 'bg-wh-blue text-white'
+                        : 'bg-white dark:bg-[#161b22] text-wh-grey hover:bg-slate-50 dark:hover:bg-white/5'
+                    }`}
+                  >
+                    🇵🇷 ES
+                  </button>
+                  <button
+                    onClick={() => setIdiomaParaPDF('en')}
+                    className={`px-3 py-1.5 text-[10px] font-black uppercase tracking-wider transition-colors border-l border-slate-200 dark:border-white/[0.08] ${
+                      idiomaParaPDF === 'en'
+                        ? 'bg-wh-blue text-white'
+                        : 'bg-white dark:bg-[#161b22] text-wh-grey hover:bg-slate-50 dark:hover:bg-white/5'
+                    }`}
+                  >
+                    🇺🇸 EN
+                  </button>
+                </div>
+              </div>
+            </div>
             <div className="grid grid-cols-2 gap-3">
               <button 
                 onClick={() => updateInput('financing', 'WH')}
