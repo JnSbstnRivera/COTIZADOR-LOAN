@@ -269,35 +269,7 @@ export default function App() {
         >
           {/* Financing Selector - Visual Redesign */}
           <section className="space-y-3">
-            <div className="flex items-center justify-between px-1">
-              <h3 className="text-[10px] font-black text-wh-grey uppercase tracking-[0.2em]">Institución Financiera</h3>
-              {/* Toggle idioma del PDF */}
-              <div className="flex items-center gap-2">
-                <span className="text-[9px] font-black text-wh-grey uppercase tracking-widest hidden sm:block">PDF</span>
-                <div className="flex rounded-xl overflow-hidden border border-slate-200 dark:border-white/[0.08] shadow-sm">
-                  <button
-                    onClick={() => setIdiomaParaPDF('es')}
-                    className={`px-3 py-1.5 text-[10px] font-black uppercase tracking-wider transition-colors ${
-                      idiomaParaPDF === 'es'
-                        ? 'bg-wh-blue text-white'
-                        : 'bg-white dark:bg-[#161b22] text-wh-grey hover:bg-slate-50 dark:hover:bg-white/5'
-                    }`}
-                  >
-                    🇵🇷 ES
-                  </button>
-                  <button
-                    onClick={() => setIdiomaParaPDF('en')}
-                    className={`px-3 py-1.5 text-[10px] font-black uppercase tracking-wider transition-colors border-l border-slate-200 dark:border-white/[0.08] ${
-                      idiomaParaPDF === 'en'
-                        ? 'bg-wh-blue text-white'
-                        : 'bg-white dark:bg-[#161b22] text-wh-grey hover:bg-slate-50 dark:hover:bg-white/5'
-                    }`}
-                  >
-                    🇺🇸 EN
-                  </button>
-                </div>
-              </div>
-            </div>
+            <h3 className="text-[10px] font-black text-wh-grey uppercase tracking-[0.2em] ml-1">Institución Financiera</h3>
             <div className="grid grid-cols-2 gap-3">
               <button 
                 onClick={() => updateInput('financing', 'WH')}
@@ -680,8 +652,6 @@ export default function App() {
         modalidades={['wh', 'oriental', 'cash']}
         modalidadesSeleccionadas={modalidadesParaPDF}
         onModalidadesChange={setModalidadesParaPDF}
-        idioma={idiomaParaPDF}
-        onIdiomaChange={setIdiomaParaPDF}
         onGenerate={handleGenerateLoanPDF}
       />
 

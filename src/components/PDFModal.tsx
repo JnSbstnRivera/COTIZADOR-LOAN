@@ -127,7 +127,7 @@ export function PDFModal({
         {/* Header */}
         <div style={{
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          padding: '16px 24px', borderBottom: '1px solid #e8eef7',
+          padding: '20px 24px', borderBottom: '1px solid #e8eef7',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <FileText size={22} color="#1a56c4" />
@@ -135,35 +135,9 @@ export function PDFModal({
               {TITULOS[tipo]}
             </span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            {/* Toggle idioma ES / EN */}
-            {onIdiomaChange && (
-              <div style={{
-                display: 'flex', borderRadius: 10, overflow: 'hidden',
-                border: '1.5px solid #d0d9ef', fontSize: 11, fontWeight: 800,
-              }}>
-                {(['es', 'en'] as const).map((lng, i) => (
-                  <button
-                    key={lng}
-                    onClick={() => onIdiomaChange(lng)}
-                    style={{
-                      padding: '5px 10px', cursor: 'pointer', border: 'none',
-                      borderLeft: i > 0 ? '1.5px solid #d0d9ef' : 'none',
-                      background: idioma === lng ? '#1a56c4' : 'white',
-                      color:      idioma === lng ? 'white'    : '#888',
-                      transition: 'all 0.15s',
-                      letterSpacing: '0.05em',
-                    }}
-                  >
-                    {lng === 'es' ? '🇵🇷 ES' : '🇺🇸 EN'}
-                  </button>
-                ))}
-              </div>
-            )}
-            <button onClick={onClose} style={{ border: 'none', background: 'none', cursor: 'pointer', padding: 4 }}>
-              <X size={20} color="#888" />
-            </button>
-          </div>
+          <button onClick={onClose} style={{ border: 'none', background: 'none', cursor: 'pointer' }}>
+            <X size={22} color="#888" />
+          </button>
         </div>
 
         <div style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 20 }}>
