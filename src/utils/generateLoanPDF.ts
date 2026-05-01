@@ -103,9 +103,12 @@ export async function generateLoanPDF(
   consultor: ConsultorData,
   resumen: LoanResumen,
 ) {
-  const res = await fetch('/loan-modelo.pdf')
-  if (!res.ok) throw new Error('No se pudo cargar el PDF modelo')
-  const originalBytes = await res.arrayBuffer()
+  const modeloUrl = resumen.idioma === 'en' ? '/loan-modelo-en.pdf' : '/loan-modelo.pdf'
+  const res = await fetch(modeloUrl)
+  // Si no existe el template en inglés, cae al español automáticamente
+  const finalRes = res.ok ? res : await fetch('/loan-modelo.pdf')
+  if (!finalRes.ok) throw new Error('No se pudo cargar el PDF modelo')
+  const originalBytes = await finalRes.arrayBuffer()
   const originalDoc   = await PDFDocument.load(originalBytes)
 
   const outputDoc = await PDFDocument.create()
