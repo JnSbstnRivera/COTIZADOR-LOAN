@@ -74,10 +74,12 @@ export default function App() {
     sistemaKW:    Number((inputs.panels * 410 / 1000).toFixed(2)),
     pronto:       inputs.manualPronto,
     cashTotal:    results.cashValue,
-    modalidades:  modalidadesParaPDF,
-    idioma:       idiomaParaPDF,
-    pagosWH:      resultsWH.monthlyPayments,
-    pagosOriental: resultsOriental.monthlyPayments,
+    modalidades:    modalidadesParaPDF,
+    idioma:         idiomaParaPDF,
+    pagosWH:        resultsWH.monthlyPayments,
+    pagosOriental:  resultsOriental.monthlyPayments,
+    garantiaSolar:   inputs.extendedSolarWarranty,
+    garantiaBateria: inputs.extendedBatteryWarranty,
   };
 
   const handleGenerateLoanPDF = async (cliente: ClienteData, consultor: ConsultorData) => {

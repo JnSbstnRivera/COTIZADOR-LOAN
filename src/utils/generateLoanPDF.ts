@@ -29,6 +29,9 @@ const LABELS = {
     panelsLbl:     'Cantidad de Paneles:',
     batteriesLbl:  'Cantidad de Baterías:',
     systemLbl:     'Tamaño del Sistema:',
+    warrantyPanel: 'Garantia Ext. Placas:',
+    warrantyBatt:  'Garantia Ext. Baterias:',
+    included:      'Incluida',
     quoteOptions:  'Opciones de Cotización',
     downPayment:   'Pronto Pago:',
     totalFinance:  'Total a Financiar:',
@@ -59,6 +62,9 @@ const LABELS = {
     panelsLbl:     'Number of Panels:',
     batteriesLbl:  'Number of Batteries:',
     systemLbl:     'System Size:',
+    warrantyPanel: 'Ext. Warranty Panels:',
+    warrantyBatt:  'Ext. Warranty Batteries:',
+    included:      'Included',
     quoteOptions:  'Quote Options',
     downPayment:   'Down Payment:',
     totalFinance:  'Total to Finance:',
@@ -96,6 +102,8 @@ export interface LoanResumen {
   pagosWH: PagoWH[]
   pagosOriental: PagoOriental[]
   idioma: Lang                      // 'es' | 'en'
+  garantiaSolar?: boolean           // garantía extendida placas
+  garantiaBateria?: boolean         // garantía extendida baterías
 }
 
 export async function generateLoanPDF(
@@ -225,6 +233,8 @@ function drawCotizacionLoan(
     [L.panelsLbl,    clean(resumen.paneles)],
     [L.batteriesLbl, clean(resumen.baterias)],
     [L.systemLbl,    `${resumen.sistemaKW} KW`],
+    ...(resumen.garantiaSolar   ? [[L.warrantyPanel, `✓ ${L.included}`] as [string,string]] : []),
+    ...(resumen.garantiaBateria ? [[L.warrantyBatt,  `✓ ${L.included}`] as [string,string]] : []),
   ]
   const rH   = 15
   const rGap = 3
