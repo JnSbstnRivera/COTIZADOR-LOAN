@@ -66,10 +66,11 @@ export default function App() {
   const [pdfModalAbierto, setPdfModalAbierto] = useState(false);
   const [modalidadesParaPDF, setModalidadesParaPDF] = useState<string[]>(['wh', 'oriental', 'cash']);
   const [idiomaParaPDF, setIdiomaParaPDF] = useState<'es' | 'en'>('es');
+  const [powerwallVersion, setPowerwallVersion] = useState<2 | 3>(3);
 
   const loanResumen = {
     paneles:      inputs.panels > 0    ? `${inputs.panels} x QCells Q PEAK DUO BLK ML-G10+ 410` : 'Sin Paneles',
-    baterias:     inputs.batteries > 0 ? `${inputs.batteries} x Tesla Powerwall 3`               : 'Sin Baterias',
+    baterias:     inputs.batteries > 0 ? `${inputs.batteries} x Tesla Powerwall ${powerwallVersion} (13.5 kWh c/u)` : 'Sin Baterias',
     sistemaKW:    Number((inputs.panels * 410 / 1000).toFixed(2)),
     pronto:       inputs.manualPronto,
     cashTotal:    results.cashValue,
@@ -654,6 +655,8 @@ export default function App() {
         onModalidadesChange={setModalidadesParaPDF}
         idioma={idiomaParaPDF}
         onIdiomaChange={setIdiomaParaPDF}
+        powerwallVersion={powerwallVersion}
+        onPowerwallChange={setPowerwallVersion}
         onGenerate={handleGenerateLoanPDF}
       />
 

@@ -35,6 +35,9 @@ interface PDFModalProps {
   // Idioma del PDF
   idioma?: 'es' | 'en'
   onIdiomaChange?: (i: 'es' | 'en') => void
+  // Para LOAN: modelo de batería
+  powerwallVersion?: 2 | 3
+  onPowerwallChange?: (v: 2 | 3) => void
 }
 
 const TITULOS = {
@@ -74,6 +77,7 @@ export function PDFModal({
   modalidades, modalidadesSeleccionadas, onModalidadesChange,
   planes, planesSeleccionados, onPlanesChange,
   idioma = 'es', onIdiomaChange,
+  powerwallVersion = 3, onPowerwallChange,
 }: PDFModalProps) {
 
   const [cliente, setCliente] = useState<ClienteData>({
@@ -191,6 +195,39 @@ export function PDFModal({
               <Field label="Teléfono del Consultor" value={consultor.telefono} onChange={v => setConsultor({...consultor, telefono: v})} />
             </div>
           </section>
+
+          {/* ── MODELO DE BATERÍA — solo LOAN ── */}
+          {tipo === 'loan' && onPowerwallChange && (
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 10,
+              background: '#f7f9ff', borderRadius: 8, padding: '8px 12px',
+            }}>
+              <span style={{ fontSize: 16 }}>🔋</span>
+              <span style={{ fontSize: 12, color: '#555', fontWeight: 600, flex: 1 }}>
+                Modelo de Batería
+              </span>
+              <div style={{ display: 'flex', borderRadius: 16, overflow: 'hidden', border: '1.5px solid #d0d9ef' }}>
+                {([2, 3] as const).map(v => (
+                  <button
+                    key={v}
+                    onClick={() => onPowerwallChange(v)}
+                    style={{
+                      padding: '4px 14px', fontSize: 11, fontWeight: 700,
+                      cursor: 'pointer', border: 'none',
+                      background: powerwallVersion === v ? '#0d2050' : 'white',
+                      color:      powerwallVersion === v ? 'white'   : '#555',
+                      transition: 'all 0.15s',
+                    }}
+                  >
+                    PW{v}
+                  </button>
+                ))}
+              </div>
+              <span style={{ fontSize: 11, color: '#888', minWidth: 60 }}>
+                Powerwall {powerwallVersion} · 13.5 kWh
+              </span>
+            </div>
+          )}
 
           {/* ── SELECTOR MODALIDADES — solo LOAN ── */}
           {tipo === 'loan' && modalidades && (
