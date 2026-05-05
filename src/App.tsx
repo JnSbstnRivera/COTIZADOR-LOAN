@@ -652,6 +652,8 @@ export default function App() {
         modalidades={['wh', 'oriental', 'cash']}
         modalidadesSeleccionadas={modalidadesParaPDF}
         onModalidadesChange={setModalidadesParaPDF}
+        idioma={idiomaParaPDF}
+        onIdiomaChange={setIdiomaParaPDF}
         onGenerate={handleGenerateLoanPDF}
       />
 

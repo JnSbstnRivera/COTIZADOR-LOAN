@@ -135,9 +135,26 @@ export function PDFModal({
               {TITULOS[tipo]}
             </span>
           </div>
-          <button onClick={onClose} style={{ border: 'none', background: 'none', cursor: 'pointer' }}>
-            <X size={22} color="#888" />
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            {onIdiomaChange && (
+              <div style={{ display: 'flex', borderRadius: 20, overflow: 'hidden', border: '1.5px solid #1a56c4' }}>
+                {(['es', 'en'] as const).map(lang => (
+                  <button key={lang} onClick={() => onIdiomaChange(lang)} style={{
+                    padding: '4px 12px', fontSize: 11, fontWeight: 700,
+                    cursor: 'pointer', border: 'none',
+                    background: idioma === lang ? '#1a56c4' : 'white',
+                    color:      idioma === lang ? 'white'   : '#1a56c4',
+                    transition: 'all 0.15s',
+                  }}>
+                    {lang.toUpperCase()}
+                  </button>
+                ))}
+              </div>
+            )}
+            <button onClick={onClose} style={{ border: 'none', background: 'none', cursor: 'pointer' }}>
+              <X size={22} color="#888" />
+            </button>
+          </div>
         </div>
 
         <div style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -266,6 +283,40 @@ export function PDFModal({
                   Selecciona al menos un plan de sellado.
                 </p>
               )}
+            </section>
+          )}
+
+          {/* ── IDIOMA DEL PDF — solo ROOFING ── */}
+          {tipo === 'roofing' && onIdiomaChange && (
+            <section>
+              <div style={{
+                fontSize: 13, fontWeight: 700, color: '#1a56c4',
+                borderBottom: '2px solid #F89B24', paddingBottom: 4, marginBottom: 12,
+              }}>
+                Idioma del PDF
+              </div>
+              <div style={{ display: 'flex', gap: 10 }}>
+                {(['es', 'en'] as const).map(lang => {
+                  const selected = idioma === lang
+                  const label    = lang === 'es' ? '🇵🇷  Español' : '🇺🇸  English'
+                  return (
+                    <button
+                      key={lang}
+                      onClick={() => onIdiomaChange(lang)}
+                      style={{
+                        flex: 1, padding: '10px 0', borderRadius: 8, fontSize: 13,
+                        cursor: 'pointer', fontWeight: 700,
+                        border: `2px solid ${selected ? '#1a56c4' : '#d0d9ef'}`,
+                        background: selected ? '#1a56c4' : 'white',
+                        color: selected ? 'white' : '#555',
+                        transition: 'all 0.15s',
+                      }}
+                    >
+                      {label}
+                    </button>
+                  )
+                })}
+              </div>
             </section>
           )}
 

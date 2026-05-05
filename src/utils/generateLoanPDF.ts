@@ -336,7 +336,7 @@ function drawPaymentSection(
   bold: any, reg: any,
   title: string, headerColor: any, lightBg: any,
   pagos: { years: number; amount: number; rate: number; amountMax?: number; rateMax?: number }[],
-  L: typeof LABELS['es'],
+  L: typeof LABELS[keyof typeof LABELS],
 ): number {
   const c1 = M + 8
   const c2 = M + 110
