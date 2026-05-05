@@ -233,8 +233,8 @@ function drawCotizacionLoan(
     [L.panelsLbl,    clean(resumen.paneles)],
     [L.batteriesLbl, clean(resumen.baterias)],
     [L.systemLbl,    `${resumen.sistemaKW} KW`],
-    ...(resumen.garantiaSolar   ? [[L.warrantyPanel, `✓ ${L.included}`] as [string,string]] : []),
-    ...(resumen.garantiaBateria ? [[L.warrantyBatt,  `✓ ${L.included}`] as [string,string]] : []),
+    ...(resumen.garantiaSolar   ? [[L.warrantyPanel, L.included] as [string,string]] : []),
+    ...(resumen.garantiaBateria ? [[L.warrantyBatt,  L.included] as [string,string]] : []),
   ]
   const rH   = 15
   const rGap = 3
