@@ -78,8 +78,8 @@ export default function App() {
     idioma:         idiomaParaPDF,
     pagosWH:        resultsWH.monthlyPayments,
     pagosOriental:  resultsOriental.monthlyPayments,
-    garantiaSolar:   inputs.extendedSolarWarranty,
-    garantiaBateria: inputs.extendedBatteryWarranty,
+    garantiaSolarTotal:   inputs.extendedSolarWarranty   ? results.solarWarrantyValue   : undefined,
+    garantiaBateriaTotal: inputs.extendedBatteryWarranty ? results.batteryWarrantyValue : undefined,
   };
 
   const handleGenerateLoanPDF = async (cliente: ClienteData, consultor: ConsultorData) => {

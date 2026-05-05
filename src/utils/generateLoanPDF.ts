@@ -102,8 +102,8 @@ export interface LoanResumen {
   pagosWH: PagoWH[]
   pagosOriental: PagoOriental[]
   idioma: Lang                      // 'es' | 'en'
-  garantiaSolar?: boolean           // garantía extendida placas
-  garantiaBateria?: boolean         // garantía extendida baterías
+  garantiaSolarTotal?: number        // valor $ garantía extendida placas
+  garantiaBateriaTotal?: number      // valor $ garantía extendida baterías
 }
 
 export async function generateLoanPDF(
@@ -233,8 +233,8 @@ function drawCotizacionLoan(
     [L.panelsLbl,    clean(resumen.paneles)],
     [L.batteriesLbl, clean(resumen.baterias)],
     [L.systemLbl,    `${resumen.sistemaKW} KW`],
-    ...(resumen.garantiaSolar   ? [[L.warrantyPanel, L.included] as [string,string]] : []),
-    ...(resumen.garantiaBateria ? [[L.warrantyBatt,  L.included] as [string,string]] : []),
+    ...(resumen.garantiaSolarTotal   ? [[L.warrantyPanel, `$${fmt(resumen.garantiaSolarTotal)}  ($0.15/watt)`] as [string,string]] : []),
+    ...(resumen.garantiaBateriaTotal ? [[L.warrantyBatt,  `$${fmt(resumen.garantiaBateriaTotal)}  ($3,000/bat.)`] as [string,string]] : []),
   ]
   const rH   = 15
   const rGap = 3
