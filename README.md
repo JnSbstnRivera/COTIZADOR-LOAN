@@ -1,44 +1,64 @@
-# COTIZADOR LOAN - Windmar Home
+# COTIZADOR LOAN
 
-Este es un cotizador integral de alta precisión para proyectos de Roofing, Solar y Baterías con múltiples opciones de financiamiento, diseñado para Windmar Home.
+Calculadora de financiamiento solar para **Windmar Home Puerto Rico**. Compara opciones de préstamo entre WH Finance y Oriental Bank en tiempo real y genera propuestas en PDF.
 
-## 🚀 Despliegue en Vercel
+---
 
-Para desplegar este proyecto en Vercel, sigue estos pasos:
+## ¿Qué hace?
 
-1. **Subir a GitHub**:
-   - Crea un nuevo repositorio en tu cuenta de GitHub.
-   - Sigue las instrucciones para subir este código (ej. `git init`, `git add .`, `git commit`, `git push`).
+El asesor ingresa el monto del proyecto y el plazo deseado. La herramienta calcula el pago mensual (fórmula PMT) para dos entidades financieras y genera una propuesta PDF con datos del cliente y consultor lista para presentar.
 
-2. **Conectar con Vercel**:
-   - Ve a [Vercel](https://vercel.com) e inicia sesión.
-   - Haz clic en **"Add New"** > **"Project"**.
-   - Importa tu repositorio de GitHub.
-   - Vercel detectará automáticamente que es un proyecto de **Vite**.
-   - Haz clic en **"Deploy"**.
+---
 
-## 🛠️ Desarrollo Local
+## Características
 
-Si deseas ejecutar el proyecto localmente:
+- Comparación WH Finance vs. Oriental Bank side-by-side
+- Cálculo PMT en tiempo real (plazo 5–25 años)
+- Campos de cliente y consultor para la propuesta
+- Exportación a PDF profesional (jsPDF + html2canvas)
+- Persistencia local de cotizaciones (SQLite vía Express)
+- Gráficas de amortización (Recharts)
+- Dark / Light mode
 
-1. Instala las dependencias:
-   ```bash
-   npm install
-   ```
+---
 
-2. Inicia el servidor de desarrollo:
-   ```bash
-   npm run dev
-   ```
+## Stack Técnico
 
-3. Abre [http://localhost:3000](http://localhost:3000) en tu navegador.
+| Capa | Tecnología |
+|---|---|
+| Frontend | React 19 + TypeScript + Vite + Tailwind CSS 4 |
+| Backend local | Express.js + better-sqlite3 |
+| PDF | jsPDF + html2canvas + pdf-lib |
+| Gráficas | Recharts |
+| IA | Google Gemini (@google/genai) |
+| Fuentes | Outfit, JetBrains Mono |
 
-## 📁 Estructura del Proyecto
+---
 
-- `src/`: Contiene el código fuente de React.
-- `server.ts`: Servidor Express (opcional para persistencia local).
-- `public/`: Archivos estáticos.
-- `vite.config.ts`: Configuración de Vite.
+## Variables de entorno
 
-## 📝 Notas sobre la Base de Datos
-El proyecto incluye un servidor Express con SQLite para guardar cotizaciones localmente. Ten en cuenta que Vercel es una plataforma para sitios estáticos y funciones serverless, por lo que el archivo `quotes.db` no persistirá datos entre reinicios en Vercel. Si necesitas persistencia real en la nube, considera conectar una base de datos externa como Supabase o Firebase.
+```
+GEMINI_API_KEY=
+```
+
+---
+
+## Instalación local
+
+```bash
+npm install
+npm run dev
+# http://localhost:5173
+```
+
+> El servidor Express corre en el puerto 3001 para guardar cotizaciones localmente. En Vercel la persistencia SQLite no aplica — conectar Supabase si se requiere en producción.
+
+---
+
+## Despliegue
+
+**Producción:** https://cotizador-loan.vercel.app
+
+---
+
+*Desarrollado para Windmar Home Puerto Rico — Call Center Operations*
