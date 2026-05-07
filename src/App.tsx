@@ -67,19 +67,42 @@ export default function App() {
   const [modalidadesParaPDF, setModalidadesParaPDF] = useState<string[]>(['wh', 'oriental', 'cash']);
   const [idiomaParaPDF, setIdiomaParaPDF] = useState<'es' | 'en'>('es');
   const [powerwallVersion, setPowerwallVersion] = useState<2 | 3>(3);
+  // Promo Mes de las Madres 2026
+  const [promoMadres, setPromoMadres] = useState<{ whCash: boolean; powerwall3: boolean }>({
+    whCash: false,
+    powerwall3: false,
+  });
+
+  const sistemaKWLoan = Number((inputs.panels * 410 / 1000).toFixed(2));
+  // Promo Mes de las Madres 2026
+  // WHF/Cash: 4-5kW: $500 | 5kW+: $1,000
+  const promoWHCashRate = sistemaKWLoan >= 5 ? 1000 : (sistemaKWLoan >= 4 ? 500 : 0);
+  const promoWHCashDescuento = (promoMadres.whCash && promoWHCashRate > 0) ? promoWHCashRate : 0;
+  // Powerwall 3: $500 por unidad si v3 está seleccionada
+  const promoPowerwallDescuento = (promoMadres.powerwall3 && powerwallVersion === 3 && inputs.batteries > 0)
+    ? 500 * inputs.batteries : 0;
+  const promoAhorroTotal = promoWHCashDescuento + promoPowerwallDescuento;
+  const promoActiva = (promoMadres.whCash || promoMadres.powerwall3) && promoAhorroTotal > 0;
+  // El descuento se aplica al cashTotal (el valor del sistema)
+  const cashTotalConPromo = Math.max(0, results.cashValue - promoAhorroTotal);
 
   const loanResumen = {
     paneles:      inputs.panels > 0    ? `${inputs.panels} x QCells Q PEAK DUO BLK ML-G10+ 410` : 'Sin Paneles',
     baterias:     inputs.batteries > 0 ? `${inputs.batteries} x Tesla Powerwall ${powerwallVersion} (13.5 kWh c/u)` : 'Sin Baterias',
-    sistemaKW:    Number((inputs.panels * 410 / 1000).toFixed(2)),
+    sistemaKW:    sistemaKWLoan,
     pronto:       inputs.manualPronto,
-    cashTotal:    results.cashValue,
+    cashTotal:    promoActiva ? cashTotalConPromo : results.cashValue,
     modalidades:    modalidadesParaPDF,
     idioma:         idiomaParaPDF,
     pagosWH:        resultsWH.monthlyPayments,
     pagosOriental:  resultsOriental.monthlyPayments,
     garantiaSolarTotal:   inputs.extendedSolarWarranty   ? results.solarWarrantyValue   : undefined,
     garantiaBateriaTotal: inputs.extendedBatteryWarranty ? results.batteryWarrantyValue : undefined,
+    promoMadres:           promoActiva,
+    promoWHCashDescuento:  promoActiva ? promoWHCashDescuento  : undefined,
+    promoPowerwallDescuento: promoActiva ? promoPowerwallDescuento : undefined,
+    promoAhorroTotal:      promoActiva ? promoAhorroTotal     : undefined,
+    cashTotalOriginal:     promoActiva ? results.cashValue    : undefined,
   };
 
   const handleGenerateLoanPDF = async (cliente: ClienteData, consultor: ConsultorData) => {
@@ -660,6 +683,10 @@ export default function App() {
         powerwallVersion={powerwallVersion}
         onPowerwallChange={setPowerwallVersion}
         onGenerate={handleGenerateLoanPDF}
+        promoMadres={promoMadres}
+        onPromoMadresChange={setPromoMadres}
+        sistemaKW={sistemaKWLoan}
+        cantidadBaterias={inputs.batteries}
       />
 
       {/* Footer */}

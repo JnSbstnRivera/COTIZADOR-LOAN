@@ -38,6 +38,11 @@ interface PDFModalProps {
   // Para LOAN: modelo de batería
   powerwallVersion?: 2 | 3
   onPowerwallChange?: (v: 2 | 3) => void
+  // Promo Mes de las Madres 2026 — solo LOAN
+  promoMadres?: { whCash: boolean; powerwall3: boolean }
+  onPromoMadresChange?: (v: { whCash: boolean; powerwall3: boolean }) => void
+  sistemaKW?: number
+  cantidadBaterias?: number
 }
 
 const TITULOS = {
@@ -78,6 +83,7 @@ export function PDFModal({
   planes, planesSeleccionados, onPlanesChange,
   idioma = 'es', onIdiomaChange,
   powerwallVersion = 3, onPowerwallChange,
+  promoMadres, onPromoMadresChange, sistemaKW = 0, cantidadBaterias = 0,
 }: PDFModalProps) {
 
   const [cliente, setCliente] = useState<ClienteData>({
@@ -356,6 +362,101 @@ export function PDFModal({
               </div>
             </section>
           )}
+
+          {/* ── PROMO MES DE LAS MADRES — solo LOAN ── */}
+          {tipo === 'loan' && onPromoMadresChange && promoMadres && (() => {
+            const whCashRate = sistemaKW >= 5 ? 1000 : (sistemaKW >= 4 ? 500 : 0)
+            const pw3Total   = (powerwallVersion === 3 && cantidadBaterias > 0) ? 500 * cantidadBaterias : 0
+            const totalAhorro =
+              (promoMadres.whCash && whCashRate > 0 ? whCashRate : 0) +
+              (promoMadres.powerwall3 && pw3Total > 0 ? pw3Total : 0)
+            return (
+              <section style={{
+                border: '2px solid #E84F97',
+                borderRadius: 12,
+                padding: 14,
+                background: 'linear-gradient(135deg, #FFEAF3 0%, #FFF5FA 100%)',
+              }}>
+                <div style={{
+                  fontSize: 13, fontWeight: 800, color: '#BE2E71',
+                  marginBottom: 6, display: 'flex', alignItems: 'center', gap: 8,
+                }}>
+                  <span style={{ fontSize: 18 }}>❤️</span>
+                  Promo Mes de las Madres 2026
+                  <span style={{ fontSize: 18 }}>❤️</span>
+                </div>
+                <p style={{ fontSize: 11, color: '#8E2658', marginBottom: 10, lineHeight: 1.4 }}>
+                  Vigente del <b>7 al 14 de mayo 2026</b> · Solo en showrooms.
+                  Marca los descuentos aplicables al cliente.
+                </p>
+
+                {/* WHF/Cash */}
+                <label style={{
+                  display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8,
+                  padding: '10px 12px', borderRadius: 8,
+                  cursor: whCashRate > 0 ? 'pointer' : 'not-allowed',
+                  opacity: whCashRate > 0 ? 1 : 0.5,
+                  background: promoMadres.whCash ? '#E84F97' : 'white',
+                  border: `2px solid ${promoMadres.whCash ? '#E84F97' : '#F8B8D4'}`,
+                }}>
+                  <input
+                    type="checkbox"
+                    checked={!!promoMadres.whCash}
+                    disabled={whCashRate === 0}
+                    onChange={e => onPromoMadresChange({ ...promoMadres, whCash: e.target.checked })}
+                    style={{ width: 18, height: 18, accentColor: '#E84F97' }}
+                  />
+                  <span style={{
+                    fontSize: 12, fontWeight: 700,
+                    color: promoMadres.whCash ? 'white' : '#BE2E71',
+                  }}>
+                    Descuento WHF/Cash: {whCashRate > 0
+                      ? `−$${whCashRate.toLocaleString()} (${sistemaKW < 5 ? '4–5 kW' : '5 kW+'})`
+                      : 'Sistema < 4 kW (no aplica)'}
+                  </span>
+                </label>
+
+                {/* Powerwall 3 */}
+                <label style={{
+                  display: 'flex', alignItems: 'center', gap: 10,
+                  padding: '10px 12px', borderRadius: 8,
+                  cursor: pw3Total > 0 ? 'pointer' : 'not-allowed',
+                  opacity: pw3Total > 0 ? 1 : 0.5,
+                  background: promoMadres.powerwall3 ? '#E84F97' : 'white',
+                  border: `2px solid ${promoMadres.powerwall3 ? '#E84F97' : '#F8B8D4'}`,
+                }}>
+                  <input
+                    type="checkbox"
+                    checked={!!promoMadres.powerwall3}
+                    disabled={pw3Total === 0}
+                    onChange={e => onPromoMadresChange({ ...promoMadres, powerwall3: e.target.checked })}
+                    style={{ width: 18, height: 18, accentColor: '#E84F97' }}
+                  />
+                  <span style={{
+                    fontSize: 12, fontWeight: 700,
+                    color: promoMadres.powerwall3 ? 'white' : '#BE2E71',
+                  }}>
+                    Tesla Powerwall 3: {pw3Total > 0
+                      ? `−$${pw3Total.toLocaleString()} ($500 × ${cantidadBaterias} unidad${cantidadBaterias > 1 ? 'es' : ''})`
+                      : (powerwallVersion !== 3 ? 'Selecciona Powerwall v3' : 'Sin baterías en cotización')}
+                  </span>
+                </label>
+
+                {totalAhorro > 0 && (
+                  <div style={{
+                    marginTop: 10, padding: '8px 12px', borderRadius: 8,
+                    background: 'white', border: '1.5px dashed #E84F97',
+                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                  }}>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: '#BE2E71' }}>Ahorro total:</span>
+                    <span style={{ fontSize: 14, fontWeight: 800, color: '#E84F97' }}>
+                      −${totalAhorro.toLocaleString()}
+                    </span>
+                  </div>
+                )}
+              </section>
+            )
+          })()}
 
           {/* ── RESUMEN AUTOMÁTICO ── */}
           <section>

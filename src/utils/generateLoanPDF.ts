@@ -14,6 +14,10 @@ const LIGHT_GREEN = rgb(0.878, 0.965, 0.882)   // light green
 const GRAY        = rgb(0.4, 0.4, 0.4)
 const DARK        = rgb(0.1, 0.1, 0.1)
 const BORDER      = rgb(0.773, 0.831, 0.937)   // #c5d4ef
+// Promo Mes de las Madres 2026
+const PINK_PROMO  = rgb(0.910, 0.310, 0.592)   // #E84F97
+const PINK_DARK   = rgb(0.745, 0.180, 0.443)   // #BE2E71
+const PINK_BG     = rgb(1.000, 0.918, 0.953)   // #FFEAF3
 
 const IVU_RATE = 1.115                          // 11.5% Puerto Rico IVU
 
@@ -51,6 +55,13 @@ const LABELS = {
     address:       'Dirección',
     energySub:     'ENERGY by Qcells',
     dateLabel:     'Fecha:',
+    promoTitle:    'PROMO MES DE LAS MADRES 2026',
+    promoValidity: 'Vigente del 7 al 14 de mayo 2026 - Solo en showroom',
+    promoWHCash:   'Descuento WHF/Cash:',
+    promoPowerwall:'Descuento Tesla Powerwall 3:',
+    promoTotal:    'Ahorro Total:',
+    promoOriginal: 'Original',
+    promoConPromo: 'Con Promo',
   },
   en: {
     title:         'Quote',
@@ -84,6 +95,13 @@ const LABELS = {
     address:       'Address',
     energySub:     'ENERGY by Qcells',
     dateLabel:     'Date:',
+    promoTitle:    'MOTHER\'S DAY 2026 SPECIAL',
+    promoValidity: 'Valid May 7-14, 2026 - Showroom only',
+    promoWHCash:   'WHF/Cash Discount:',
+    promoPowerwall:'Tesla Powerwall 3 Discount:',
+    promoTotal:    'Total Savings:',
+    promoOriginal: 'Original',
+    promoConPromo: 'With Promo',
   },
 } as const
 
@@ -104,6 +122,12 @@ export interface LoanResumen {
   idioma: Lang                      // 'es' | 'en'
   garantiaSolarTotal?: number        // valor $ garantía extendida placas
   garantiaBateriaTotal?: number      // valor $ garantía extendida baterías
+  // Promo Mes de las Madres 2026
+  promoMadres?: boolean
+  promoWHCashDescuento?: number     // $500 (4-5kW) o $1,000 (5kW+) si activa
+  promoPowerwallDescuento?: number  // $500 por Powerwall 3 si activa
+  promoAhorroTotal?: number         // suma total promo
+  cashTotalOriginal?: number        // valor sin promo (para mostrar tachado)
 }
 
 export async function generateLoanPDF(
@@ -256,6 +280,34 @@ function drawCotizacionLoan(
   page.drawLine({ start: { x: M, y: sy - 5 }, end: { x: M + 160, y: sy - 5 }, thickness: 2, color: ORANGE_ACC })
   sy -= 20
 
+  // ── Bloque PROMO MES DE LAS MADRES ──
+  if (resumen.promoMadres && resumen.promoAhorroTotal && resumen.promoAhorroTotal > 0) {
+    const blockH = 56
+    rect(page, M, sy - blockH + 6, dataW, blockH, PINK_BG)
+    page.drawRectangle({
+      x: M, y: sy - blockH + 6, width: dataW, height: blockH,
+      borderColor: PINK_PROMO, borderWidth: 1.4,
+    })
+    drawHeart(page, M + 14, sy - 1, 5.5, PINK_PROMO)
+    text(page, (L as any).promoTitle, 11, M + 26, sy - 4, bold, PINK_DARK)
+    drawHeart(page, M + dataW - 20, sy - 1, 5.5, PINK_PROMO)
+    text(page, (L as any).promoValidity, 7, M + 26, sy - 16, reg, PINK_DARK)
+    let py = sy - 28
+    if (resumen.promoWHCashDescuento && resumen.promoWHCashDescuento > 0) {
+      text(page, (L as any).promoWHCash, 8, M + 14,  py, bold, PINK_DARK)
+      text(page, `-$${fmt(resumen.promoWHCashDescuento)}`, 9, M + 140, py, bold, PINK_PROMO)
+      py -= 11
+    }
+    if (resumen.promoPowerwallDescuento && resumen.promoPowerwallDescuento > 0) {
+      text(page, (L as any).promoPowerwall, 8, M + 14, py, bold, PINK_DARK)
+      text(page, `-$${fmt(resumen.promoPowerwallDescuento)}`, 9, M + 140, py, bold, PINK_PROMO)
+      py -= 11
+    }
+    text(page, (L as any).promoTotal, 9, M + 280, sy - 28, bold, PINK_DARK)
+    text(page, `-$${fmt(resumen.promoAhorroTotal)}`, 12, M + 360, sy - 28, bold, PINK_PROMO)
+    sy -= blockH + 8
+  }
+
   // Pronto Pago + Total a Financiar (compartido)
   const totalFinanciar = Math.max(resumen.cashTotal - resumen.pronto, 0)
   const finRows: [string, string][] = [
@@ -292,12 +344,28 @@ function drawCotizacionLoan(
     text(page, L.cashColTax,    7.5, cC4, sy + 2, bold, WHITE)
     sy -= 18
 
-    rect(page, M, sy - 3, dataW, 16, LIGHT_GREEN)
-    text(page, L.cashRowDesc,               8.5, cC1, sy + 2, reg,  DARK)
-    text(page, `$${fmt(resumen.cashTotal)}`, 8.5, cC2, sy + 2, bold, GREEN_CASH)
-    text(page, `$${fmt(sinIVU)}`,            8.5, cC3, sy + 2, reg,  DARK)
-    text(page, `$${fmt(soloIVU)}`,           8.5, cC4, sy + 2, reg,  DARK)
-    sy -= 19
+    const hasPromo = resumen.promoMadres && resumen.cashTotalOriginal && resumen.cashTotalOriginal > resumen.cashTotal
+    const rowH = hasPromo ? 26 : 16
+    rect(page, M, sy - 3 - (hasPromo ? 10 : 0), dataW, rowH, hasPromo ? PINK_BG : LIGHT_GREEN)
+    text(page, L.cashRowDesc, 8.5, cC1, sy + 2, reg, DARK)
+    if (hasPromo) {
+      // Original tachado encima
+      drawStrike(page, cC2, sy + 2, `$${fmt(resumen.cashTotalOriginal!)}`, 7.5, reg, GRAY)
+      const sinIVUOriginal  = resumen.cashTotalOriginal! / IVU_RATE
+      const soloIVUOriginal = resumen.cashTotalOriginal! - sinIVUOriginal
+      drawStrike(page, cC3, sy + 2, `$${fmt(sinIVUOriginal)}`,  7.5, reg, GRAY)
+      drawStrike(page, cC4, sy + 2, `$${fmt(soloIVUOriginal)}`, 7.5, reg, GRAY)
+      // Promo abajo en rosa
+      text(page, `$${fmt(resumen.cashTotal)}`, 9, cC2, sy - 9, bold, PINK_DARK)
+      text(page, `$${fmt(sinIVU)}`,            8, cC3, sy - 9, bold, PINK_DARK)
+      text(page, `$${fmt(soloIVU)}`,           8, cC4, sy - 9, bold, PINK_DARK)
+      drawHeart(page, M + dataW - 12, sy - 4, 3.2, PINK_PROMO)
+    } else {
+      text(page, `$${fmt(resumen.cashTotal)}`, 8.5, cC2, sy + 2, bold, GREEN_CASH)
+      text(page, `$${fmt(sinIVU)}`,            8.5, cC3, sy + 2, reg,  DARK)
+      text(page, `$${fmt(soloIVU)}`,           8.5, cC4, sy + 2, reg,  DARK)
+    }
+    sy -= rowH + 3
 
     text(page, L.cashNote, 7, M + 8, sy + 2, reg, GRAY)
     sy -= 11
@@ -418,4 +486,28 @@ function downloadPDF(bytes: Uint8Array, filename: string) {
   const a    = document.createElement('a')
   a.href = url; a.download = filename; a.click()
   URL.revokeObjectURL(url)
+}
+// Corazón sólido vectorial (pdf-lib StandardFonts no soporta emoji multibyte)
+function drawHeart(page: any, cx: number, cy: number, r: number, color: any) {
+  try {
+    const path =
+      `M 0,${-r * 0.25} ` +
+      `C ${-r * 1.1},${r * 0.95} ${-r * 1.4},${-r * 0.4} 0,${-r * 1.5} ` +
+      `C ${r * 1.4},${-r * 0.4} ${r * 1.1},${r * 0.95} 0,${-r * 0.25} Z`
+    page.drawSvgPath(path, { x: cx, y: cy, color, borderColor: color, borderWidth: 0.2 })
+  } catch {
+    page.drawEllipse({ x: cx - r * 0.45, y: cy + r * 0.2, xScale: r * 0.55, yScale: r * 0.55, color })
+    page.drawEllipse({ x: cx + r * 0.45, y: cy + r * 0.2, xScale: r * 0.55, yScale: r * 0.55, color })
+    page.drawEllipse({ x: cx, y: cy - r * 0.4, xScale: r * 0.85, yScale: r * 0.85, color })
+  }
+}
+// Texto tachado (línea horizontal)
+function drawStrike(page: any, x: number, y: number, t: string, size: number, font: any, color: any) {
+  try { page.drawText(t, { x, y, size, font, color }) } catch { }
+  const w = size * 0.55 * t.length
+  page.drawLine({
+    start: { x, y: y + size * 0.35 },
+    end:   { x: x + w, y: y + size * 0.35 },
+    thickness: 0.6, color,
+  })
 }
