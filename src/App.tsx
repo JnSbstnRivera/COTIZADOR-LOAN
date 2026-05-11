@@ -72,6 +72,10 @@ export default function App() {
     whCash: false,
     powerwall3: false,
   });
+  // Promoción Droguerías (descuento manual % a todo el financiamiento)
+  const [droguerias, setDroguerias] = useState<{ activa: boolean; nombre: string; porcentaje: number }>({
+    activa: false, nombre: '', porcentaje: 0,
+  });
 
   const sistemaKWLoan = Number((inputs.panels * 410 / 1000).toFixed(2));
   // Promo Mes de las Madres 2026
@@ -86,16 +90,29 @@ export default function App() {
   // El descuento se aplica al cashTotal (el valor del sistema)
   const cashTotalConPromo = Math.max(0, results.cashValue - promoAhorroTotal);
 
+  // Droguerías (mutuamente exclusiva con Mother's Day)
+  const drogActiva = droguerias.activa && droguerias.porcentaje > 0 && droguerias.nombre.trim() !== '' && !promoActiva;
+  const drogFactor = drogActiva ? (1 - droguerias.porcentaje / 100) : 1;
+  const applyDrog  = (pagos: typeof resultsWH.monthlyPayments) =>
+    pagos.map(p => ({
+      ...p,
+      amount: p.amount * drogFactor,
+      ...(p.amountMax !== undefined ? { amountMax: p.amountMax * drogFactor } : {}),
+    }));
+
+  const cashFinalBase = promoActiva ? cashTotalConPromo : results.cashValue;
+  const cashFinal = drogActiva ? cashFinalBase * drogFactor : cashFinalBase;
+
   const loanResumen = {
     paneles:      inputs.panels > 0    ? `${inputs.panels} x QCells Q PEAK DUO BLK ML-G10+ 410` : 'Sin Paneles',
     baterias:     inputs.batteries > 0 ? `${inputs.batteries} x Tesla Powerwall ${powerwallVersion} (13.5 kWh c/u)` : 'Sin Baterias',
     sistemaKW:    sistemaKWLoan,
     pronto:       inputs.manualPronto,
-    cashTotal:    promoActiva ? cashTotalConPromo : results.cashValue,
+    cashTotal:    cashFinal,
     modalidades:    modalidadesParaPDF,
     idioma:         idiomaParaPDF,
-    pagosWH:        resultsWH.monthlyPayments,
-    pagosOriental:  resultsOriental.monthlyPayments,
+    pagosWH:        drogActiva ? applyDrog(resultsWH.monthlyPayments)       : resultsWH.monthlyPayments,
+    pagosOriental:  drogActiva ? applyDrog(resultsOriental.monthlyPayments) : resultsOriental.monthlyPayments,
     garantiaSolarTotal:   inputs.extendedSolarWarranty   ? results.solarWarrantyValue   : undefined,
     garantiaBateriaTotal: inputs.extendedBatteryWarranty ? results.batteryWarrantyValue : undefined,
     promoMadres:           promoActiva,
@@ -103,6 +120,14 @@ export default function App() {
     promoPowerwallDescuento: promoActiva ? promoPowerwallDescuento : undefined,
     promoAhorroTotal:      promoActiva ? promoAhorroTotal     : undefined,
     cashTotalOriginal:     promoActiva ? results.cashValue    : undefined,
+    // Droguerías
+    drogueria: drogActiva ? {
+      nombre:     droguerias.nombre.trim(),
+      porcentaje: droguerias.porcentaje,
+      cashOriginal:    cashFinalBase,
+      pagosWHOriginal: resultsWH.monthlyPayments,
+      pagosOrientalOriginal: resultsOriental.monthlyPayments,
+    } : undefined,
   };
 
   const handleGenerateLoanPDF = async (cliente: ClienteData, consultor: ConsultorData) => {
@@ -687,6 +712,8 @@ export default function App() {
         onPromoMadresChange={setPromoMadres}
         sistemaKW={sistemaKWLoan}
         cantidadBaterias={inputs.batteries}
+        droguerias={droguerias}
+        onDrogueriasChange={setDroguerias}
       />
 
       {/* Footer */}
