@@ -72,8 +72,8 @@ export default function App() {
     whCash: false,
     powerwall3: false,
   });
-  // Promoción Droguerías (descuento manual % a todo el financiamiento)
-  const [droguerias, setDroguerias] = useState<{ activa: boolean; nombre: string; porcentaje: number }>({
+  // Promoción Farmacias (descuento manual % a todo el financiamiento)
+  const [farmacias, setFarmacias] = useState<{ activa: boolean; nombre: string; porcentaje: number }>({
     activa: false, nombre: '', porcentaje: 0,
   });
 
@@ -90,18 +90,18 @@ export default function App() {
   // El descuento se aplica al cashTotal (el valor del sistema)
   const cashTotalConPromo = Math.max(0, results.cashValue - promoAhorroTotal);
 
-  // Droguerías (mutuamente exclusiva con Mother's Day)
-  const drogActiva = droguerias.activa && droguerias.porcentaje > 0 && droguerias.nombre.trim() !== '' && !promoActiva;
-  const drogFactor = drogActiva ? (1 - droguerias.porcentaje / 100) : 1;
-  const applyDrog  = (pagos: typeof resultsWH.monthlyPayments) =>
+  // Farmacias (mutuamente exclusiva con Mother's Day)
+  const farmaActiva = farmacias.activa && farmacias.porcentaje > 0 && farmacias.nombre.trim() !== '' && !promoActiva;
+  const farmaFactor = farmaActiva ? (1 - farmacias.porcentaje / 100) : 1;
+  const applyFarma  = (pagos: typeof resultsWH.monthlyPayments) =>
     pagos.map(p => ({
       ...p,
-      amount: p.amount * drogFactor,
-      ...(p.amountMax !== undefined ? { amountMax: p.amountMax * drogFactor } : {}),
+      amount: p.amount * farmaFactor,
+      ...(p.amountMax !== undefined ? { amountMax: p.amountMax * farmaFactor } : {}),
     }));
 
   const cashFinalBase = promoActiva ? cashTotalConPromo : results.cashValue;
-  const cashFinal = drogActiva ? cashFinalBase * drogFactor : cashFinalBase;
+  const cashFinal = farmaActiva ? cashFinalBase * farmaFactor : cashFinalBase;
 
   const loanResumen = {
     paneles:      inputs.panels > 0    ? `${inputs.panels} x QCells Q PEAK DUO BLK ML-G10+ 410` : 'Sin Paneles',
@@ -111,8 +111,8 @@ export default function App() {
     cashTotal:    cashFinal,
     modalidades:    modalidadesParaPDF,
     idioma:         idiomaParaPDF,
-    pagosWH:        drogActiva ? applyDrog(resultsWH.monthlyPayments)       : resultsWH.monthlyPayments,
-    pagosOriental:  drogActiva ? applyDrog(resultsOriental.monthlyPayments) : resultsOriental.monthlyPayments,
+    pagosWH:        farmaActiva ? applyFarma(resultsWH.monthlyPayments)       : resultsWH.monthlyPayments,
+    pagosOriental:  farmaActiva ? applyFarma(resultsOriental.monthlyPayments) : resultsOriental.monthlyPayments,
     garantiaSolarTotal:   inputs.extendedSolarWarranty   ? results.solarWarrantyValue   : undefined,
     garantiaBateriaTotal: inputs.extendedBatteryWarranty ? results.batteryWarrantyValue : undefined,
     promoMadres:           promoActiva,
@@ -120,10 +120,10 @@ export default function App() {
     promoPowerwallDescuento: promoActiva ? promoPowerwallDescuento : undefined,
     promoAhorroTotal:      promoActiva ? promoAhorroTotal     : undefined,
     cashTotalOriginal:     promoActiva ? results.cashValue    : undefined,
-    // Droguerías
-    drogueria: drogActiva ? {
-      nombre:     droguerias.nombre.trim(),
-      porcentaje: droguerias.porcentaje,
+    // Farmacias
+    farmacia: farmaActiva ? {
+      nombre:     farmacias.nombre.trim(),
+      porcentaje: farmacias.porcentaje,
       cashOriginal:    cashFinalBase,
       pagosWHOriginal: resultsWH.monthlyPayments,
       pagosOrientalOriginal: resultsOriental.monthlyPayments,
@@ -712,8 +712,8 @@ export default function App() {
         onPromoMadresChange={setPromoMadres}
         sistemaKW={sistemaKWLoan}
         cantidadBaterias={inputs.batteries}
-        droguerias={droguerias}
-        onDrogueriasChange={setDroguerias}
+        farmacias={farmacias}
+        onFarmaciasChange={setFarmacias}
       />
 
       {/* Footer */}

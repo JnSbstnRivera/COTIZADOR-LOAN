@@ -43,9 +43,9 @@ interface PDFModalProps {
   onPromoMadresChange?: (v: { whCash: boolean; powerwall3: boolean }) => void
   sistemaKW?: number
   cantidadBaterias?: number
-  // Promoción Droguerías
-  droguerias?: { activa: boolean; nombre: string; porcentaje: number }
-  onDrogueriasChange?: (v: { activa: boolean; nombre: string; porcentaje: number }) => void
+  // Promoción Farmacias
+  farmacias?: { activa: boolean; nombre: string; porcentaje: number }
+  onFarmaciasChange?: (v: { activa: boolean; nombre: string; porcentaje: number }) => void
 }
 
 const TITULOS = {
@@ -87,7 +87,7 @@ export function PDFModal({
   idioma = 'es', onIdiomaChange,
   powerwallVersion = 3, onPowerwallChange,
   promoMadres, onPromoMadresChange, sistemaKW = 0, cantidadBaterias = 0,
-  droguerias, onDrogueriasChange,
+  farmacias, onFarmaciasChange,
 }: PDFModalProps) {
 
   const [cliente, setCliente] = useState<ClienteData>({
@@ -100,7 +100,7 @@ export function PDFModal({
   const [error, setError]     = useState('')
   const [promosOpen, setPromosOpen] = useState(false)
   const [madresOpen, setMadresOpen] = useState(true)
-  const [drogOpen,   setDrogOpen]   = useState(true)
+  const [farmaOpen,   setFarmaOpen]   = useState(true)
 
   const handleGenerate = async () => {
     if (!cliente.nombre.trim() || !consultor.nombre.trim()) {
@@ -115,12 +115,12 @@ export function PDFModal({
       setError('Selecciona al menos un plan de sellado.')
       return
     }
-    if (droguerias?.activa) {
-      if (!droguerias.nombre.trim()) {
-        setError('Ingresa el nombre de la droguería antes de generar el PDF.')
+    if (farmacias?.activa) {
+      if (!farmacias.nombre.trim()) {
+        setError('Ingresa el nombre de la farmacia antes de generar el PDF.')
         return
       }
-      if (!droguerias.porcentaje || droguerias.porcentaje < 1) {
+      if (!farmacias.porcentaje || farmacias.porcentaje < 1) {
         setError('Ingresa un porcentaje de descuento válido (1-50).')
         return
       }
@@ -381,7 +381,7 @@ export function PDFModal({
           )}
 
           {/* ── DROPDOWN DE PROMOCIONES ── */}
-          {tipo === 'loan' && (onPromoMadresChange || onDrogueriasChange) && (() => {
+          {tipo === 'loan' && (onPromoMadresChange || onFarmaciasChange) && (() => {
             const whCashRate = sistemaKW >= 5 ? 1000 : (sistemaKW >= 4 ? 500 : 0)
             const pw3Total   = (powerwallVersion === 3 && cantidadBaterias > 0) ? 500 * cantidadBaterias : 0
             const madresAct = !!(promoMadres && (promoMadres.whCash || promoMadres.powerwall3))
@@ -401,12 +401,12 @@ export function PDFModal({
                     🎁 Promociones disponibles
                   </span>
                   <span style={{ fontSize: 11, color: '#777' }}>
-                    {(madresAct || droguerias?.activa) && (
+                    {(madresAct || farmacias?.activa) && (
                       <span style={{
                         background: madresAct ? '#E84F97' : '#0F9D58',
                         color: 'white', padding: '2px 8px', borderRadius: 10, fontWeight: 700, marginRight: 6,
                       }}>
-                        {madresAct ? '❤ Madres activa' : '⚕ Drogueria activa'}
+                        {madresAct ? '❤ Madres activa' : '⚕ Farmacia activa'}
                       </span>
                     )}
                     {promosOpen ? '▴' : '▾'}
@@ -422,7 +422,7 @@ export function PDFModal({
                         border: `2px solid ${madresAct ? '#E84F97' : '#F8B8D4'}`,
                         borderRadius: 10, overflow: 'hidden',
                         background: 'linear-gradient(135deg, #FFEAF3 0%, #FFF5FA 100%)',
-                        opacity: droguerias?.activa ? 0.45 : 1,
+                        opacity: farmacias?.activa ? 0.45 : 1,
                       }}>
                         <button type="button" onClick={() => setMadresOpen(o => !o)}
                           style={{
@@ -441,17 +441,17 @@ export function PDFModal({
                             <label style={{
                               display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8,
                               padding: '10px 12px', borderRadius: 8,
-                              cursor: (whCashRate > 0 && !droguerias?.activa) ? 'pointer' : 'not-allowed',
+                              cursor: (whCashRate > 0 && !farmacias?.activa) ? 'pointer' : 'not-allowed',
                               opacity: whCashRate > 0 ? 1 : 0.5,
                               background: promoMadres.whCash ? '#E84F97' : 'white',
                               border: `2px solid ${promoMadres.whCash ? '#E84F97' : '#F8B8D4'}`,
                             }}>
                               <input type="checkbox" checked={!!promoMadres.whCash}
-                                disabled={whCashRate === 0 || droguerias?.activa}
+                                disabled={whCashRate === 0 || farmacias?.activa}
                                 onChange={e => {
                                   onPromoMadresChange({ ...promoMadres, whCash: e.target.checked })
-                                  if (e.target.checked && onDrogueriasChange && droguerias?.activa) {
-                                    onDrogueriasChange({ ...droguerias, activa: false })
+                                  if (e.target.checked && onFarmaciasChange && farmacias?.activa) {
+                                    onFarmaciasChange({ ...farmacias, activa: false })
                                   }
                                 }}
                                 style={{ width: 18, height: 18, accentColor: '#E84F97' }} />
@@ -464,17 +464,17 @@ export function PDFModal({
                             <label style={{
                               display: 'flex', alignItems: 'center', gap: 10,
                               padding: '10px 12px', borderRadius: 8,
-                              cursor: (pw3Total > 0 && !droguerias?.activa) ? 'pointer' : 'not-allowed',
+                              cursor: (pw3Total > 0 && !farmacias?.activa) ? 'pointer' : 'not-allowed',
                               opacity: pw3Total > 0 ? 1 : 0.5,
                               background: promoMadres.powerwall3 ? '#E84F97' : 'white',
                               border: `2px solid ${promoMadres.powerwall3 ? '#E84F97' : '#F8B8D4'}`,
                             }}>
                               <input type="checkbox" checked={!!promoMadres.powerwall3}
-                                disabled={pw3Total === 0 || droguerias?.activa}
+                                disabled={pw3Total === 0 || farmacias?.activa}
                                 onChange={e => {
                                   onPromoMadresChange({ ...promoMadres, powerwall3: e.target.checked })
-                                  if (e.target.checked && onDrogueriasChange && droguerias?.activa) {
-                                    onDrogueriasChange({ ...droguerias, activa: false })
+                                  if (e.target.checked && onFarmaciasChange && farmacias?.activa) {
+                                    onFarmaciasChange({ ...farmacias, activa: false })
                                   }
                                 }}
                                 style={{ width: 18, height: 18, accentColor: '#E84F97' }} />
@@ -496,9 +496,9 @@ export function PDFModal({
                                 </span>
                               </div>
                             )}
-                            {droguerias?.activa && (
+                            {farmacias?.activa && (
                               <p style={{ fontSize: 10.5, color: '#888', marginTop: 6, fontStyle: 'italic' }}>
-                                Desactiva Droguerías para usar Mes de las Madres.
+                                Desactiva Farmacias para usar Mes de las Madres.
                               </p>
                             )}
                           </div>
@@ -506,55 +506,55 @@ export function PDFModal({
                       </div>
                     )}
 
-                    {/* Droguerías */}
-                    {onDrogueriasChange && droguerias && (
+                    {/* Farmacias */}
+                    {onFarmaciasChange && farmacias && (
                       <div style={{
-                        border: `2px solid ${droguerias.activa ? '#0F9D58' : '#A7E5C4'}`,
+                        border: `2px solid ${farmacias.activa ? '#0F9D58' : '#A7E5C4'}`,
                         borderRadius: 10, overflow: 'hidden',
                         background: 'linear-gradient(135deg, #E8F8F0 0%, #F3FBF6 100%)',
                         opacity: madresAct ? 0.45 : 1,
                       }}>
-                        <button type="button" onClick={() => setDrogOpen(o => !o)}
+                        <button type="button" onClick={() => setFarmaOpen(o => !o)}
                           style={{
                             width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                             padding: '10px 12px', background: 'transparent', border: 'none', cursor: 'pointer',
                             fontSize: 12.5, fontWeight: 800, color: '#066647',
                           }}>
-                          <span>💊 PROMOCION DROGUERIAS ⚕️</span>
-                          <span>{drogOpen ? '▴' : '▾'}</span>
+                          <span>💊 PROMOCION FARMACIAS ⚕️</span>
+                          <span>{farmaOpen ? '▴' : '▾'}</span>
                         </button>
-                        {drogOpen && (
+                        {farmaOpen && (
                           <div style={{ padding: '0 12px 12px' }}>
                             <p style={{ fontSize: 11, color: '#0a6b40', marginBottom: 10, lineHeight: 1.4 }}>
-                              🩺 Descuento manual para campañas con droguerías. Se aplica a <b>todo el financiamiento</b> (Cash + WH + Oriental).
+                              🩺 Descuento manual para campañas con farmacias. Se aplica a <b>todo el financiamiento</b> (Cash + WH + Oriental).
                             </p>
                             <label style={{
                               display: 'flex', alignItems: 'center', gap: 10,
                               padding: '10px 12px', borderRadius: 8, marginBottom: 10,
                               cursor: madresAct ? 'not-allowed' : 'pointer',
-                              background: droguerias.activa ? '#0F9D58' : 'white',
-                              border: `2px solid ${droguerias.activa ? '#0F9D58' : '#A7E5C4'}`,
+                              background: farmacias.activa ? '#0F9D58' : 'white',
+                              border: `2px solid ${farmacias.activa ? '#0F9D58' : '#A7E5C4'}`,
                             }}>
-                              <input type="checkbox" checked={droguerias.activa} disabled={madresAct}
+                              <input type="checkbox" checked={farmacias.activa} disabled={madresAct}
                                 onChange={e => {
-                                  onDrogueriasChange({ ...droguerias, activa: e.target.checked })
+                                  onFarmaciasChange({ ...farmacias, activa: e.target.checked })
                                   if (e.target.checked && onPromoMadresChange && madresAct) {
                                     onPromoMadresChange({ whCash: false, powerwall3: false })
                                   }
                                 }}
                                 style={{ width: 18, height: 18, accentColor: '#0F9D58' }} />
-                              <span style={{ fontSize: 12, fontWeight: 700, color: droguerias.activa ? 'white' : '#066647' }}>
-                                Aplicar descuento de droguería
+                              <span style={{ fontSize: 12, fontWeight: 700, color: farmacias.activa ? 'white' : '#066647' }}>
+                                Aplicar descuento de farmacia
                               </span>
                             </label>
-                            {droguerias.activa && (
+                            {farmacias.activa && (
                               <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 8 }}>
                                 <div>
                                   <label style={{ display: 'block', fontSize: 11, color: '#066647', marginBottom: 4, fontWeight: 700 }}>
-                                    🏥 Nombre de la droguería *
+                                    🏥 Nombre de la farmacia *
                                   </label>
-                                  <input type="text" value={droguerias.nombre}
-                                    onChange={e => onDrogueriasChange({ ...droguerias, nombre: e.target.value })}
+                                  <input type="text" value={farmacias.nombre}
+                                    onChange={e => onFarmaciasChange({ ...farmacias, nombre: e.target.value })}
                                     placeholder="Ej: Walgreens, CVS, Caridad..." maxLength={40}
                                     style={{
                                       width: '100%', border: '1.5px solid #A7E5C4', borderRadius: 8,
@@ -566,9 +566,9 @@ export function PDFModal({
                                     ⚕️ Descuento %
                                   </label>
                                   <input type="number" min={1} max={100} step={1}
-                                    value={droguerias.porcentaje || ''}
-                                    onChange={e => onDrogueriasChange({
-                                      ...droguerias,
+                                    value={farmacias.porcentaje || ''}
+                                    onChange={e => onFarmaciasChange({
+                                      ...farmacias,
                                       porcentaje: Math.max(0, Math.min(100, parseInt(e.target.value) || 0))
                                     })}
                                     placeholder="15"
@@ -580,7 +580,7 @@ export function PDFModal({
                                 </div>
                               </div>
                             )}
-                            {droguerias.activa && droguerias.porcentaje > 50 && (
+                            {farmacias.activa && farmacias.porcentaje > 50 && (
                               <p style={{
                                 fontSize: 10.5, color: '#b45309', marginTop: 8,
                                 background: '#fef3c7', padding: '6px 10px', borderRadius: 6,

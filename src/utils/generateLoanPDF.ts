@@ -18,7 +18,7 @@ const BORDER      = rgb(0.773, 0.831, 0.937)   // #c5d4ef
 const PINK_PROMO  = rgb(0.910, 0.310, 0.592)   // #E84F97
 const PINK_DARK   = rgb(0.745, 0.180, 0.443)   // #BE2E71
 const PINK_BG     = rgb(1.000, 0.918, 0.953)   // #FFEAF3
-// Promoción Droguerías (tema farmacia)
+// Promoción Farmacias (tema farmacia)
 const PHARM_GREEN = rgb(0.059, 0.616, 0.345)   // #0F9D58
 const PHARM_DARK  = rgb(0.024, 0.400, 0.251)   // #066647
 const PHARM_BG    = rgb(0.910, 0.973, 0.941)   // #E8F8F0
@@ -132,8 +132,8 @@ export interface LoanResumen {
   promoPowerwallDescuento?: number  // $500 por Powerwall 3 si activa
   promoAhorroTotal?: number         // suma total promo
   cashTotalOriginal?: number        // valor sin promo (para mostrar tachado)
-  // Promoción Droguerías
-  drogueria?: {
+  // Promoción Farmacias
+  farmacia?: {
     nombre: string
     porcentaje: number
     cashOriginal: number
@@ -292,8 +292,8 @@ function drawCotizacionLoan(
   page.drawLine({ start: { x: M, y: sy - 5 }, end: { x: M + 160, y: sy - 5 }, thickness: 2, color: ORANGE_ACC })
   sy -= 20
 
-  // ── Banner PROMOCION DROGUERIAS ──
-  if (resumen.drogueria) {
+  // ── Banner PROMOCION FARMACIAS ──
+  if (resumen.farmacia) {
     const bannerH = 26
     rect(page, M, sy - bannerH + 8, dataW, bannerH, PHARM_BG)
     page.drawRectangle({
@@ -302,14 +302,14 @@ function drawCotizacionLoan(
     })
     drawCross(page, M + 12, sy + 1, 6, PHARM_GREEN)
     drawCross(page, M + dataW - 18, sy + 1, 6, PHARM_GREEN)
-    const drogTitle = resumen.idioma === 'en'
-      ? `PHARMACY PROMOTION - ${resumen.drogueria.nombre.toUpperCase()} - ${resumen.drogueria.porcentaje}% OFF`
-      : `PROMOCION DROGUERIAS - ${resumen.drogueria.nombre.toUpperCase()} - ${resumen.drogueria.porcentaje}% OFF`
-    text(page, drogTitle, 10, M + 26, sy, bold, PHARM_DARK)
-    const drogSub = resumen.idioma === 'en'
+    const farmaTitle = resumen.idioma === 'en'
+      ? `PHARMACY PROMOTION - ${resumen.farmacia.nombre.toUpperCase()} - ${resumen.farmacia.porcentaje}% OFF`
+      : `PROMOCION FARMACIAS - ${resumen.farmacia.nombre.toUpperCase()} - ${resumen.farmacia.porcentaje}% OFF`
+    text(page, farmaTitle, 10, M + 26, sy, bold, PHARM_DARK)
+    const farmaSub = resumen.idioma === 'en'
       ? 'Discount applied to entire financing (Cash + WH + Oriental)'
       : 'Descuento aplicado a todo el financiamiento (Cash + WH + Oriental)'
-    text(page, drogSub, 6.5, M + 26, sy - 12, reg, PHARM_DARK)
+    text(page, farmaSub, 6.5, M + 26, sy - 12, reg, PHARM_DARK)
     sy -= bannerH + 6
   }
 
@@ -378,15 +378,15 @@ function drawCotizacionLoan(
     sy -= 18
 
     const hasPromo = resumen.promoMadres && resumen.cashTotalOriginal && resumen.cashTotalOriginal > resumen.cashTotal
-    const hasDrog  = !!resumen.drogueria && resumen.drogueria.cashOriginal > resumen.cashTotal
-    const tinted = hasPromo || hasDrog
-    const tColor = hasDrog ? PHARM_DARK : PINK_DARK
-    const tBg    = hasDrog ? PHARM_BG   : PINK_BG
+    const hasFarma  = !!resumen.farmacia && resumen.farmacia.cashOriginal > resumen.cashTotal
+    const tinted = hasPromo || hasFarma
+    const tColor = hasFarma ? PHARM_DARK : PINK_DARK
+    const tBg    = hasFarma ? PHARM_BG   : PINK_BG
     const rowH = tinted ? 26 : 16
     rect(page, M, sy - 3 - (tinted ? 10 : 0), dataW, rowH, tinted ? tBg : LIGHT_GREEN)
     text(page, L.cashRowDesc, 8.5, cC1, sy + 2, reg, DARK)
     if (tinted) {
-      const origCash = hasDrog ? resumen.drogueria!.cashOriginal : resumen.cashTotalOriginal!
+      const origCash = hasFarma ? resumen.farmacia!.cashOriginal : resumen.cashTotalOriginal!
       const sinIVUOriginal  = origCash / IVU_RATE
       const soloIVUOriginal = origCash - sinIVUOriginal
       drawStrike(page, cC2, sy + 2, `$${fmt(origCash)}`,         7.5, reg, GRAY)
@@ -395,7 +395,7 @@ function drawCotizacionLoan(
       text(page, `$${fmt(resumen.cashTotal)}`, 9, cC2, sy - 9, bold, tColor)
       text(page, `$${fmt(sinIVU)}`,            8, cC3, sy - 9, bold, tColor)
       text(page, `$${fmt(soloIVU)}`,           8, cC4, sy - 9, bold, tColor)
-      if (hasDrog) drawCross(page, M + dataW - 12, sy - 4, 3.5, PHARM_GREEN)
+      if (hasFarma) drawCross(page, M + dataW - 12, sy - 4, 3.5, PHARM_GREEN)
       else         drawHeart(page, M + dataW - 12, sy - 4, 3.2, PINK_PROMO)
     } else {
       text(page, `$${fmt(resumen.cashTotal)}`, 8.5, cC2, sy + 2, bold, GREEN_CASH)
@@ -415,14 +415,14 @@ function drawCotizacionLoan(
   if (resumen.modalidades.includes('wh')) {
     sy = drawPaymentSection(page, sy, M, dataW, bold, reg,
       'WH FINANCIAL', BLUE, LIGHT_BLUE, resumen.pagosWH, L,
-      resumen.drogueria?.pagosWHOriginal)
+      resumen.farmacia?.pagosWHOriginal)
   }
 
   // ── ORIENTAL BANK ─────────────────────────────────────────────
   if (resumen.modalidades.includes('oriental')) {
     sy = drawPaymentSection(page, sy, M, dataW, bold, reg,
       'ORIENTAL BANK', ORANGE_OB, LIGHT_OB, resumen.pagosOriental, L,
-      resumen.drogueria?.pagosOrientalOriginal)
+      resumen.farmacia?.pagosOrientalOriginal)
   }
 
   // ── Footer ──
@@ -476,9 +476,9 @@ function drawPaymentSection(
   } else {
     pagos.forEach(({ years, rate, amount, rateMax, amountMax }, i) => {
       const orig = pagosOriginales?.[i]
-      const hasDrog = !!orig && (orig.amount > amount)
-      const rowH = hasDrog ? 26 : 16
-      if (i % 2 === 0) rect(page, M, sy - 3 - (hasDrog ? 10 : 0), dataW, rowH, hasDrog ? PHARM_BG : lightBg)
+      const hasFarma = !!orig && (orig.amount > amount)
+      const rowH = hasFarma ? 26 : 16
+      if (i % 2 === 0) rect(page, M, sy - 3 - (hasFarma ? 10 : 0), dataW, rowH, hasFarma ? PHARM_BG : lightBg)
       const aprStr = rateMax
         ? `${(rate * 100).toFixed(2)}% - ${(rateMax * 100).toFixed(2)}%`
         : `${(rate * 100).toFixed(2)}%`
@@ -487,7 +487,7 @@ function drawPaymentSection(
         : `$${fmt(amount)}`
       text(page, `${years} ${L.years}`, 8.5, c1, sy + 2, reg,  DARK)
       text(page, aprStr,                8.5, c2, sy + 2, reg,  DARK)
-      if (hasDrog && orig) {
+      if (hasFarma && orig) {
         const origStr = orig.amountMax
           ? `$${fmt(orig.amount)} - $${fmt(orig.amountMax)}`
           : `$${fmt(orig.amount)}`
