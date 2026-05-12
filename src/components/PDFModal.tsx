@@ -46,6 +46,8 @@ interface PDFModalProps {
   // Promoción Farmacias (10% fijo solo sobre placas)
   farmacias?: { activa: boolean; nombre: string }
   onFarmaciasChange?: (v: { activa: boolean; nombre: string }) => void
+  farmaKWMin?: number
+  farmaKWMax?: number
 }
 
 const TITULOS = {
@@ -87,7 +89,7 @@ export function PDFModal({
   idioma = 'es', onIdiomaChange,
   powerwallVersion = 3, onPowerwallChange,
   promoMadres, onPromoMadresChange, sistemaKW = 0, cantidadBaterias = 0,
-  farmacias, onFarmaciasChange,
+  farmacias, onFarmaciasChange, farmaKWMin = 5, farmaKWMax = 35,
 }: PDFModalProps) {
 
   const [cliente, setCliente] = useState<ClienteData>({
@@ -118,6 +120,10 @@ export function PDFModal({
     if (farmacias?.activa) {
       if (!farmacias.nombre.trim()) {
         setError('Ingresa el nombre de la farmacia antes de generar el PDF.')
+        return
+      }
+      if (tipo === 'loan' && (sistemaKW < farmaKWMin || sistemaKW > farmaKWMax)) {
+        setError(`La promoción de farmacias solo aplica para sistemas entre ${farmaKWMin} kW y ${farmaKWMax} kW.`)
         return
       }
     }
@@ -519,20 +525,48 @@ export function PDFModal({
                           <span>💊 PROMOCION FARMACIAS ⚕️</span>
                           <span>{farmaOpen ? '▴' : '▾'}</span>
                         </button>
-                        {farmaOpen && (
+                        {farmaOpen && (() => {
+                          const kwEligible = sistemaKW >= farmaKWMin && sistemaKW <= farmaKWMax
+                          const checkboxDisabled = madresAct || !kwEligible
+                          return (
                           <div style={{ padding: '0 12px 12px' }}>
-                            <p style={{ fontSize: 11, color: '#0a6b40', marginBottom: 10, lineHeight: 1.4 }}>
+                            <p style={{ fontSize: 11, color: '#0a6b40', marginBottom: 6, lineHeight: 1.4 }}>
                               🩺 Descuento fijo de <b>10%</b> sobre el valor de las <b>placas solares únicamente</b>.
                               Las baterías Powerwall <b>no llevan descuento</b> y se muestran aparte en el PDF.
                             </p>
+                            {/* Tabla de rango Desde-Hasta */}
+                            <div style={{
+                              display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1,
+                              marginBottom: 10, background: '#0F9D58', borderRadius: 6,
+                              overflow: 'hidden', border: '1.5px solid #0F9D58',
+                            }}>
+                              <div style={{ background: '#0F9D58', color: 'white', textAlign: 'center', padding: '4px', fontSize: 11, fontWeight: 800 }}>Desde</div>
+                              <div style={{ background: '#0F9D58', color: 'white', textAlign: 'center', padding: '4px', fontSize: 11, fontWeight: 800 }}>Hasta</div>
+                              <div style={{ background: 'white', color: '#066647', textAlign: 'center', padding: '6px', fontSize: 12, fontWeight: 700 }}>{farmaKWMin} kW</div>
+                              <div style={{ background: 'white', color: '#066647', textAlign: 'center', padding: '6px', fontSize: 12, fontWeight: 700 }}>{farmaKWMax} kW</div>
+                            </div>
+                            {/* Mensaje si está fuera de rango */}
+                            {!kwEligible && (
+                              <p style={{
+                                fontSize: 11, color: '#b45309', marginBottom: 10,
+                                background: '#fef3c7', padding: '8px 12px', borderRadius: 8,
+                                border: '1.5px solid #fbbf24', lineHeight: 1.4,
+                              }}>
+                                ⚠️ El sistema actual es de <b>{sistemaKW} kW</b>.
+                                Esta promoción <b>no aplica</b> — el rango permitido es entre
+                                <b> {farmaKWMin} kW y {farmaKWMax} kW</b>.
+                              </p>
+                            )}
                             <label style={{
                               display: 'flex', alignItems: 'center', gap: 10,
                               padding: '10px 12px', borderRadius: 8, marginBottom: 10,
-                              cursor: madresAct ? 'not-allowed' : 'pointer',
-                              background: farmacias.activa ? '#0F9D58' : 'white',
-                              border: `2px solid ${farmacias.activa ? '#0F9D58' : '#A7E5C4'}`,
+                              cursor: checkboxDisabled ? 'not-allowed' : 'pointer',
+                              opacity: checkboxDisabled ? 0.55 : 1,
+                              background: (farmacias.activa && kwEligible) ? '#0F9D58' : 'white',
+                              border: `2px solid ${(farmacias.activa && kwEligible) ? '#0F9D58' : '#A7E5C4'}`,
                             }}>
-                              <input type="checkbox" checked={farmacias.activa} disabled={madresAct}
+                              <input type="checkbox" checked={farmacias.activa && kwEligible}
+                                disabled={checkboxDisabled}
                                 onChange={e => {
                                   onFarmaciasChange({ ...farmacias, activa: e.target.checked })
                                   if (e.target.checked && onPromoMadresChange && madresAct) {
@@ -540,11 +574,11 @@ export function PDFModal({
                                   }
                                 }}
                                 style={{ width: 18, height: 18, accentColor: '#0F9D58' }} />
-                              <span style={{ fontSize: 12, fontWeight: 700, color: farmacias.activa ? 'white' : '#066647' }}>
+                              <span style={{ fontSize: 12, fontWeight: 700, color: (farmacias.activa && kwEligible) ? 'white' : '#066647' }}>
                                 Aplicar 10% descuento en placas
                               </span>
                             </label>
-                            {farmacias.activa && (
+                            {farmacias.activa && kwEligible && (
                               <div>
                                 <label style={{ display: 'block', fontSize: 11, color: '#066647', marginBottom: 4, fontWeight: 700 }}>
                                   🏥 Nombre de la farmacia *
@@ -564,7 +598,8 @@ export function PDFModal({
                               </p>
                             )}
                           </div>
-                        )}
+                          )
+                        })()}
                       </div>
                     )}
                   </div>

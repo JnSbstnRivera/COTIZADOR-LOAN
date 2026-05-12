@@ -91,7 +91,11 @@ export default function App() {
   const cashTotalConPromo = Math.max(0, results.cashValue - promoAhorroTotal);
 
   // Farmacias (mutuamente exclusiva con Mother's Day) — 10% FIJO solo sobre PLACAS
-  const farmaActiva   = farmacias.activa && farmacias.nombre.trim() !== '' && !promoActiva && inputs.panels > 0;
+  // Solo elegible si el sistema solar está entre 5 kW y 35 kW
+  const farmaKWMin = 5;
+  const farmaKWMax = 35;
+  const farmaKWEligible = sistemaKWLoan >= farmaKWMin && sistemaKWLoan <= farmaKWMax;
+  const farmaActiva   = farmacias.activa && farmacias.nombre.trim() !== '' && !promoActiva && inputs.panels > 0 && farmaKWEligible;
   const placasOrig    = results.solarValue;
   const placasDescuento = farmaActiva ? placasOrig * 0.10 : 0;
   const placasConPromo  = placasOrig - placasDescuento;
@@ -727,6 +731,8 @@ export default function App() {
         cantidadBaterias={inputs.batteries}
         farmacias={farmacias}
         onFarmaciasChange={setFarmacias}
+        farmaKWMin={farmaKWMin}
+        farmaKWMax={farmaKWMax}
       />
 
       {/* Footer */}
