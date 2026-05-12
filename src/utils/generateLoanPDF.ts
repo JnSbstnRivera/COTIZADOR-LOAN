@@ -299,16 +299,16 @@ function drawCotizacionLoan(
   // ── Bloque PROMOCION FARMACIAS (10% solo placas, baterías aparte) ──
   if (resumen.farmacia) {
     const f = resumen.farmacia
-    const blockH = 100   // +14 para dar mucho aire arriba del título
+    const blockH = 82   // compacto pero con aire arriba del título
     rect(page, M, sy - blockH + 8, dataW, blockH, PHARM_BG)
     page.drawRectangle({
       x: M, y: sy - blockH + 8, width: dataW, height: blockH,
       borderColor: PHARM_GREEN, borderWidth: 1.4,
     })
-    // titleY: baja el título 22pt respecto al borde superior del marco
-    const titleY = sy - 18
-    drawCross(page, M + 12, titleY + 3, 6, PHARM_GREEN)
-    drawCross(page, M + dataW - 18, titleY + 3, 6, PHARM_GREEN)
+    // titleY: baja el título 18pt respecto al borde superior del marco
+    const titleY = sy - 14
+    drawCross(page, M + 12, titleY + 3, 5.5, PHARM_GREEN)
+    drawCross(page, M + dataW - 18, titleY + 3, 5.5, PHARM_GREEN)
     const farmaTitle = resumen.idioma === 'en'
       ? `PHARMACY PROMOTION - ${f.nombre.toUpperCase()} - 10% OFF SOLAR PANELS`
       : `PROMOCION FARMACIAS - ${f.nombre.toUpperCase()} - 10% OFF EN PLACAS`
@@ -316,30 +316,30 @@ function drawCotizacionLoan(
     const farmaSub = resumen.idioma === 'en'
       ? 'Discount applies ONLY to solar panels - Batteries shown separately at full price'
       : 'Descuento aplica SOLO a placas solares - Baterias aparte sin descuento'
-    text(page, farmaSub, 6.5, M + 26, titleY - 12, reg, PHARM_DARK)
+    text(page, farmaSub, 6.5, M + 26, titleY - 11, reg, PHARM_DARK)
 
     // Resta visible: placas original - 10% = placas con promo
     const labelOrig = resumen.idioma === 'en' ? 'Solar panels (original):' : 'Placas solares (original):'
     const labelDesc = resumen.idioma === 'en' ? 'Discount 10%:'             : 'Descuento 10%:'
     const labelBat  = resumen.idioma === 'en' ? 'Batteries (no discount):'   : 'Baterias (sin descuento):'
 
-    text(page, labelOrig, 8.5, M + 26, titleY - 28, reg,  PHARM_DARK)
-    text(page, `$${fmt(f.placasOriginal)}`, 9, M + 220, titleY - 28, bold, DARK)
-    text(page, `−`,                          11, M + 290, titleY - 28, bold, PHARM_GREEN)
-    text(page, labelDesc, 8.5, M + 305, titleY - 28, reg, PHARM_DARK)
-    text(page, `$${fmt(f.placasDescuento)}`, 9, M + 380, titleY - 28, bold, PHARM_GREEN)
-    text(page, `=`,                          11, M + 445, titleY - 28, bold, PHARM_GREEN)
-    text(page, `$${fmt(f.placasConPromo)}`,  10, M + 460, titleY - 28, bold, PHARM_DARK)
+    text(page, labelOrig, 8.5, M + 26, titleY - 24, reg,  PHARM_DARK)
+    text(page, `$${fmt(f.placasOriginal)}`, 9, M + 220, titleY - 24, bold, DARK)
+    text(page, `−`,                          11, M + 290, titleY - 24, bold, PHARM_GREEN)
+    text(page, labelDesc, 8.5, M + 305, titleY - 24, reg, PHARM_DARK)
+    text(page, `$${fmt(f.placasDescuento)}`, 9, M + 380, titleY - 24, bold, PHARM_GREEN)
+    text(page, `=`,                          11, M + 445, titleY - 24, bold, PHARM_GREEN)
+    text(page, `$${fmt(f.placasConPromo)}`,  10, M + 460, titleY - 24, bold, PHARM_DARK)
 
     // Baterías aparte
-    text(page, labelBat, 8.5, M + 26, titleY - 48, reg, PHARM_DARK)
-    text(page, `$${fmt(f.bateriasValor)}`, 9, M + 220, titleY - 48, bold, DARK)
+    text(page, labelBat, 8.5, M + 26, titleY - 40, reg, PHARM_DARK)
+    text(page, `$${fmt(f.bateriasValor)}`, 9, M + 220, titleY - 40, bold, DARK)
     const labelNote = resumen.idioma === 'en'
       ? '(Powerwall keeps its original price)'
       : '(Powerwall mantiene su precio original)'
-    text(page, labelNote, 7, M + 290, titleY - 48, reg, GRAY)
+    text(page, labelNote, 7, M + 290, titleY - 40, reg, GRAY)
 
-    sy -= blockH + 6
+    sy -= blockH + 4
   }
 
   // ── Bloque PROMO MES DE LAS MADRES ──
@@ -413,33 +413,33 @@ function drawCotizacionLoan(
     const tinted = hasPromo || hasFarma
     const tColor = hasFarma ? PHARM_DARK : PINK_DARK
     const tBg    = hasFarma ? PHARM_BG   : PINK_BG
-    const rowH = tinted ? 26 : 16
-    rect(page, M, sy - 3 - (tinted ? 10 : 0), dataW, rowH, tinted ? tBg : LIGHT_GREEN)
+    const rowH = tinted ? 21 : 16
+    rect(page, M, sy - 3 - (tinted ? 7 : 0), dataW, rowH, tinted ? tBg : LIGHT_GREEN)
     text(page, L.cashRowDesc, 8.5, cC1, sy + 2, reg, DARK)
     if (tinted) {
       const origCash = hasFarma ? resumen.farmacia!.cashOriginal : resumen.cashTotalOriginal!
       const sinIVUOriginal  = origCash / IVU_RATE
       const soloIVUOriginal = origCash - sinIVUOriginal
-      drawStrike(page, cC2, sy + 2, `$${fmt(origCash)}`,         7.5, reg, GRAY)
-      drawStrike(page, cC3, sy + 2, `$${fmt(sinIVUOriginal)}`,   7.5, reg, GRAY)
-      drawStrike(page, cC4, sy + 2, `$${fmt(soloIVUOriginal)}`,  7.5, reg, GRAY)
-      text(page, `$${fmt(resumen.cashTotal)}`, 9, cC2, sy - 9, bold, tColor)
-      text(page, `$${fmt(sinIVU)}`,            8, cC3, sy - 9, bold, tColor)
-      text(page, `$${fmt(soloIVU)}`,           8, cC4, sy - 9, bold, tColor)
-      if (hasFarma) drawCross(page, M + dataW - 12, sy - 4, 3.5, PHARM_GREEN)
-      else         drawHeart(page, M + dataW - 12, sy - 4, 3.2, PINK_PROMO)
+      drawStrike(page, cC2, sy + 2, `$${fmt(origCash)}`,         7, reg, GRAY)
+      drawStrike(page, cC3, sy + 2, `$${fmt(sinIVUOriginal)}`,   7, reg, GRAY)
+      drawStrike(page, cC4, sy + 2, `$${fmt(soloIVUOriginal)}`,  7, reg, GRAY)
+      text(page, `$${fmt(resumen.cashTotal)}`, 8.5, cC2, sy - 7, bold, tColor)
+      text(page, `$${fmt(sinIVU)}`,            7.5, cC3, sy - 7, bold, tColor)
+      text(page, `$${fmt(soloIVU)}`,           7.5, cC4, sy - 7, bold, tColor)
+      if (hasFarma) drawCross(page, M + dataW - 12, sy - 3, 3, PHARM_GREEN)
+      else         drawHeart(page, M + dataW - 12, sy - 3, 3, PINK_PROMO)
     } else {
       text(page, `$${fmt(resumen.cashTotal)}`, 8.5, cC2, sy + 2, bold, GREEN_CASH)
       text(page, `$${fmt(sinIVU)}`,            8.5, cC3, sy + 2, reg,  DARK)
       text(page, `$${fmt(soloIVU)}`,           8.5, cC4, sy + 2, reg,  DARK)
     }
-    sy -= rowH + 3
+    sy -= rowH + 2
 
     text(page, L.cashNote, 7, M + 8, sy + 2, reg, GRAY)
-    sy -= 11
+    sy -= 10
 
     page.drawLine({ start: { x: M, y: sy + 2 }, end: { x: M + dataW, y: sy + 2 }, thickness: 0.5, color: BORDER })
-    sy -= 10
+    sy -= 6
   }
 
   // ── WH FINANCIAL ─────────────────────────────────────────────
@@ -508,8 +508,8 @@ function drawPaymentSection(
     pagos.forEach(({ years, rate, amount, rateMax, amountMax }, i) => {
       const orig = pagosOriginales?.[i]
       const hasFarma = !!orig && (orig.amount > amount)
-      const rowH = hasFarma ? 26 : 16
-      if (i % 2 === 0) rect(page, M, sy - 3 - (hasFarma ? 10 : 0), dataW, rowH, hasFarma ? PHARM_BG : lightBg)
+      const rowH = hasFarma ? 21 : 16
+      if (i % 2 === 0) rect(page, M, sy - 3 - (hasFarma ? 7 : 0), dataW, rowH, hasFarma ? PHARM_BG : lightBg)
       const aprStr = rateMax
         ? `${(rate * 100).toFixed(2)}% - ${(rateMax * 100).toFixed(2)}%`
         : `${(rate * 100).toFixed(2)}%`
@@ -522,9 +522,9 @@ function drawPaymentSection(
         const origStr = orig.amountMax
           ? `$${fmt(orig.amount)} - $${fmt(orig.amountMax)}`
           : `$${fmt(orig.amount)}`
-        drawStrike(page, c3, sy + 2, origStr, 7.5, reg, GRAY)
-        text(page, montoStr, 9, c3, sy - 9, bold, PHARM_DARK)
-        drawCross(page, M + dataW - 14, sy - 4, 3.5, PHARM_GREEN)
+        drawStrike(page, c3, sy + 2, origStr, 7, reg, GRAY)
+        text(page, montoStr, 8.5, c3, sy - 7, bold, PHARM_DARK)
+        drawCross(page, M + dataW - 14, sy - 2, 3, PHARM_GREEN)
       } else {
         text(page, montoStr, 8.5, c3, sy + 2, bold, DARK)
       }
@@ -533,10 +533,10 @@ function drawPaymentSection(
   }
 
   text(page, L.payNote, 7, M + 8, sy + 2, reg, GRAY)
-  sy -= 11
+  sy -= 10
 
   page.drawLine({ start: { x: M, y: sy + 2 }, end: { x: M + dataW, y: sy + 2 }, thickness: 0.5, color: BORDER })
-  sy -= 10
+  sy -= 6
 
   return sy
 }
