@@ -299,16 +299,16 @@ function drawCotizacionLoan(
   // ── Bloque PROMOCION FARMACIAS (10% solo placas, baterías aparte) ──
   if (resumen.farmacia) {
     const f = resumen.farmacia
-    const blockH = 86   // +8 para dar aire arriba del título
+    const blockH = 100   // +14 para dar mucho aire arriba del título
     rect(page, M, sy - blockH + 8, dataW, blockH, PHARM_BG)
     page.drawRectangle({
       x: M, y: sy - blockH + 8, width: dataW, height: blockH,
       borderColor: PHARM_GREEN, borderWidth: 1.4,
     })
-    // titleY: baja el título 8pt respecto al borde superior del marco
-    const titleY = sy - 8
-    drawCross(page, M + 12, titleY + 1, 6, PHARM_GREEN)
-    drawCross(page, M + dataW - 18, titleY + 1, 6, PHARM_GREEN)
+    // titleY: baja el título 22pt respecto al borde superior del marco
+    const titleY = sy - 18
+    drawCross(page, M + 12, titleY + 3, 6, PHARM_GREEN)
+    drawCross(page, M + dataW - 18, titleY + 3, 6, PHARM_GREEN)
     const farmaTitle = resumen.idioma === 'en'
       ? `PHARMACY PROMOTION - ${f.nombre.toUpperCase()} - 10% OFF SOLAR PANELS`
       : `PROMOCION FARMACIAS - ${f.nombre.toUpperCase()} - 10% OFF EN PLACAS`
@@ -344,14 +344,14 @@ function drawCotizacionLoan(
 
   // ── Bloque PROMO MES DE LAS MADRES ──
   if (resumen.promoMadres && resumen.promoAhorroTotal && resumen.promoAhorroTotal > 0) {
-    const blockH = 62   // +6 para dar aire arriba del título
+    const blockH = 76   // +14 para dar mucho aire arriba del título
     rect(page, M, sy - blockH + 6, dataW, blockH, PINK_BG)
     page.drawRectangle({
       x: M, y: sy - blockH + 6, width: dataW, height: blockH,
       borderColor: PINK_PROMO, borderWidth: 1.4,
     })
-    // titleY: baja el título para separarlo del borde superior
-    const titleY = sy - 10
+    // titleY: baja el título 22pt respecto al borde superior del marco
+    const titleY = sy - 20
     drawHeart(page, M + 14, titleY + 4, 5.5, PINK_PROMO)
     text(page, (L as any).promoTitle, 11, M + 26, titleY, bold, PINK_DARK)
     drawHeart(page, M + dataW - 20, titleY + 4, 5.5, PINK_PROMO)
