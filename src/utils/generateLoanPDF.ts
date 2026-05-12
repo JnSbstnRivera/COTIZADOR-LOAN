@@ -299,61 +299,64 @@ function drawCotizacionLoan(
   // ── Bloque PROMOCION FARMACIAS (10% solo placas, baterías aparte) ──
   if (resumen.farmacia) {
     const f = resumen.farmacia
-    const blockH = 78
+    const blockH = 86   // +8 para dar aire arriba del título
     rect(page, M, sy - blockH + 8, dataW, blockH, PHARM_BG)
     page.drawRectangle({
       x: M, y: sy - blockH + 8, width: dataW, height: blockH,
       borderColor: PHARM_GREEN, borderWidth: 1.4,
     })
-    drawCross(page, M + 12, sy + 1, 6, PHARM_GREEN)
-    drawCross(page, M + dataW - 18, sy + 1, 6, PHARM_GREEN)
+    // titleY: baja el título 8pt respecto al borde superior del marco
+    const titleY = sy - 8
+    drawCross(page, M + 12, titleY + 1, 6, PHARM_GREEN)
+    drawCross(page, M + dataW - 18, titleY + 1, 6, PHARM_GREEN)
     const farmaTitle = resumen.idioma === 'en'
       ? `PHARMACY PROMOTION - ${f.nombre.toUpperCase()} - 10% OFF SOLAR PANELS`
       : `PROMOCION FARMACIAS - ${f.nombre.toUpperCase()} - 10% OFF EN PLACAS`
-    text(page, farmaTitle, 10, M + 26, sy, bold, PHARM_DARK)
+    text(page, farmaTitle, 10, M + 26, titleY, bold, PHARM_DARK)
     const farmaSub = resumen.idioma === 'en'
       ? 'Discount applies ONLY to solar panels - Batteries shown separately at full price'
       : 'Descuento aplica SOLO a placas solares - Baterias aparte sin descuento'
-    text(page, farmaSub, 6.5, M + 26, sy - 12, reg, PHARM_DARK)
+    text(page, farmaSub, 6.5, M + 26, titleY - 12, reg, PHARM_DARK)
 
     // Resta visible: placas original - 10% = placas con promo
     const labelOrig = resumen.idioma === 'en' ? 'Solar panels (original):' : 'Placas solares (original):'
     const labelDesc = resumen.idioma === 'en' ? 'Discount 10%:'             : 'Descuento 10%:'
-    const labelNew  = resumen.idioma === 'en' ? 'Solar panels (with promo):' : 'Placas con promo:'
     const labelBat  = resumen.idioma === 'en' ? 'Batteries (no discount):'   : 'Baterias (sin descuento):'
 
-    text(page, labelOrig, 8.5, M + 26, sy - 28, reg,  PHARM_DARK)
-    text(page, `$${fmt(f.placasOriginal)}`, 9, M + 220, sy - 28, bold, DARK)
-    text(page, `−`,                          11, M + 290, sy - 28, bold, PHARM_GREEN)
-    text(page, labelDesc, 8.5, M + 305, sy - 28, reg, PHARM_DARK)
-    text(page, `$${fmt(f.placasDescuento)}`, 9, M + 380, sy - 28, bold, PHARM_GREEN)
-    text(page, `=`,                          11, M + 445, sy - 28, bold, PHARM_GREEN)
-    text(page, `$${fmt(f.placasConPromo)}`,  10, M + 460, sy - 28, bold, PHARM_DARK)
+    text(page, labelOrig, 8.5, M + 26, titleY - 28, reg,  PHARM_DARK)
+    text(page, `$${fmt(f.placasOriginal)}`, 9, M + 220, titleY - 28, bold, DARK)
+    text(page, `−`,                          11, M + 290, titleY - 28, bold, PHARM_GREEN)
+    text(page, labelDesc, 8.5, M + 305, titleY - 28, reg, PHARM_DARK)
+    text(page, `$${fmt(f.placasDescuento)}`, 9, M + 380, titleY - 28, bold, PHARM_GREEN)
+    text(page, `=`,                          11, M + 445, titleY - 28, bold, PHARM_GREEN)
+    text(page, `$${fmt(f.placasConPromo)}`,  10, M + 460, titleY - 28, bold, PHARM_DARK)
 
     // Baterías aparte
-    text(page, labelBat, 8.5, M + 26, sy - 48, reg, PHARM_DARK)
-    text(page, `$${fmt(f.bateriasValor)}`, 9, M + 220, sy - 48, bold, DARK)
+    text(page, labelBat, 8.5, M + 26, titleY - 48, reg, PHARM_DARK)
+    text(page, `$${fmt(f.bateriasValor)}`, 9, M + 220, titleY - 48, bold, DARK)
     const labelNote = resumen.idioma === 'en'
       ? '(Powerwall keeps its original price)'
       : '(Powerwall mantiene su precio original)'
-    text(page, labelNote, 7, M + 290, sy - 48, reg, GRAY)
+    text(page, labelNote, 7, M + 290, titleY - 48, reg, GRAY)
 
     sy -= blockH + 6
   }
 
   // ── Bloque PROMO MES DE LAS MADRES ──
   if (resumen.promoMadres && resumen.promoAhorroTotal && resumen.promoAhorroTotal > 0) {
-    const blockH = 56
+    const blockH = 62   // +6 para dar aire arriba del título
     rect(page, M, sy - blockH + 6, dataW, blockH, PINK_BG)
     page.drawRectangle({
       x: M, y: sy - blockH + 6, width: dataW, height: blockH,
       borderColor: PINK_PROMO, borderWidth: 1.4,
     })
-    drawHeart(page, M + 14, sy - 1, 5.5, PINK_PROMO)
-    text(page, (L as any).promoTitle, 11, M + 26, sy - 4, bold, PINK_DARK)
-    drawHeart(page, M + dataW - 20, sy - 1, 5.5, PINK_PROMO)
-    text(page, (L as any).promoValidity, 7, M + 26, sy - 16, reg, PINK_DARK)
-    let py = sy - 28
+    // titleY: baja el título para separarlo del borde superior
+    const titleY = sy - 10
+    drawHeart(page, M + 14, titleY + 4, 5.5, PINK_PROMO)
+    text(page, (L as any).promoTitle, 11, M + 26, titleY, bold, PINK_DARK)
+    drawHeart(page, M + dataW - 20, titleY + 4, 5.5, PINK_PROMO)
+    text(page, (L as any).promoValidity, 7, M + 26, titleY - 12, reg, PINK_DARK)
+    let py = titleY - 24
     if (resumen.promoWHCashDescuento && resumen.promoWHCashDescuento > 0) {
       text(page, (L as any).promoWHCash, 8, M + 14,  py, bold, PINK_DARK)
       text(page, `-$${fmt(resumen.promoWHCashDescuento)}`, 9, M + 140, py, bold, PINK_PROMO)
@@ -364,8 +367,8 @@ function drawCotizacionLoan(
       text(page, `-$${fmt(resumen.promoPowerwallDescuento)}`, 9, M + 140, py, bold, PINK_PROMO)
       py -= 11
     }
-    text(page, (L as any).promoTotal, 9, M + 280, sy - 28, bold, PINK_DARK)
-    text(page, `-$${fmt(resumen.promoAhorroTotal)}`, 12, M + 360, sy - 28, bold, PINK_PROMO)
+    text(page, (L as any).promoTotal, 9, M + 280, titleY - 24, bold, PINK_DARK)
+    text(page, `-$${fmt(resumen.promoAhorroTotal)}`, 12, M + 360, titleY - 24, bold, PINK_PROMO)
     sy -= blockH + 8
   }
 
