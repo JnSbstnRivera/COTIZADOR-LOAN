@@ -132,10 +132,14 @@ export interface LoanResumen {
   promoPowerwallDescuento?: number  // $500 por Powerwall 3 si activa
   promoAhorroTotal?: number         // suma total promo
   cashTotalOriginal?: number        // valor sin promo (para mostrar tachado)
-  // Promoción Farmacias
+  // Promoción Farmacias — 10% fijo solo sobre placas
   farmacia?: {
     nombre: string
-    porcentaje: number
+    porcentaje: number          // siempre 10
+    placasOriginal: number      // $ placas sin descuento
+    placasDescuento: number     // 10% del precio de placas
+    placasConPromo: number      // placas con descuento aplicado
+    bateriasValor: number       // $ baterías (sin descuento, mostrar aparte)
     cashOriginal: number
     pagosWHOriginal: PagoWH[]
     pagosOrientalOriginal: PagoOriental[]
@@ -292,25 +296,49 @@ function drawCotizacionLoan(
   page.drawLine({ start: { x: M, y: sy - 5 }, end: { x: M + 160, y: sy - 5 }, thickness: 2, color: ORANGE_ACC })
   sy -= 20
 
-  // ── Banner PROMOCION FARMACIAS ──
+  // ── Bloque PROMOCION FARMACIAS (10% solo placas, baterías aparte) ──
   if (resumen.farmacia) {
-    const bannerH = 26
-    rect(page, M, sy - bannerH + 8, dataW, bannerH, PHARM_BG)
+    const f = resumen.farmacia
+    const blockH = 78
+    rect(page, M, sy - blockH + 8, dataW, blockH, PHARM_BG)
     page.drawRectangle({
-      x: M, y: sy - bannerH + 8, width: dataW, height: bannerH,
+      x: M, y: sy - blockH + 8, width: dataW, height: blockH,
       borderColor: PHARM_GREEN, borderWidth: 1.4,
     })
     drawCross(page, M + 12, sy + 1, 6, PHARM_GREEN)
     drawCross(page, M + dataW - 18, sy + 1, 6, PHARM_GREEN)
     const farmaTitle = resumen.idioma === 'en'
-      ? `PHARMACY PROMOTION - ${resumen.farmacia.nombre.toUpperCase()} - ${resumen.farmacia.porcentaje}% OFF`
-      : `PROMOCION FARMACIAS - ${resumen.farmacia.nombre.toUpperCase()} - ${resumen.farmacia.porcentaje}% OFF`
+      ? `PHARMACY PROMOTION - ${f.nombre.toUpperCase()} - 10% OFF SOLAR PANELS`
+      : `PROMOCION FARMACIAS - ${f.nombre.toUpperCase()} - 10% OFF EN PLACAS`
     text(page, farmaTitle, 10, M + 26, sy, bold, PHARM_DARK)
     const farmaSub = resumen.idioma === 'en'
-      ? 'Discount applied to entire financing (Cash + WH + Oriental)'
-      : 'Descuento aplicado a todo el financiamiento (Cash + WH + Oriental)'
+      ? 'Discount applies ONLY to solar panels - Batteries shown separately at full price'
+      : 'Descuento aplica SOLO a placas solares - Baterias aparte sin descuento'
     text(page, farmaSub, 6.5, M + 26, sy - 12, reg, PHARM_DARK)
-    sy -= bannerH + 6
+
+    // Resta visible: placas original - 10% = placas con promo
+    const labelOrig = resumen.idioma === 'en' ? 'Solar panels (original):' : 'Placas solares (original):'
+    const labelDesc = resumen.idioma === 'en' ? 'Discount 10%:'             : 'Descuento 10%:'
+    const labelNew  = resumen.idioma === 'en' ? 'Solar panels (with promo):' : 'Placas con promo:'
+    const labelBat  = resumen.idioma === 'en' ? 'Batteries (no discount):'   : 'Baterias (sin descuento):'
+
+    text(page, labelOrig, 8.5, M + 26, sy - 28, reg,  PHARM_DARK)
+    text(page, `$${fmt(f.placasOriginal)}`, 9, M + 220, sy - 28, bold, DARK)
+    text(page, `−`,                          11, M + 290, sy - 28, bold, PHARM_GREEN)
+    text(page, labelDesc, 8.5, M + 305, sy - 28, reg, PHARM_DARK)
+    text(page, `$${fmt(f.placasDescuento)}`, 9, M + 380, sy - 28, bold, PHARM_GREEN)
+    text(page, `=`,                          11, M + 445, sy - 28, bold, PHARM_GREEN)
+    text(page, `$${fmt(f.placasConPromo)}`,  10, M + 460, sy - 28, bold, PHARM_DARK)
+
+    // Baterías aparte
+    text(page, labelBat, 8.5, M + 26, sy - 48, reg, PHARM_DARK)
+    text(page, `$${fmt(f.bateriasValor)}`, 9, M + 220, sy - 48, bold, DARK)
+    const labelNote = resumen.idioma === 'en'
+      ? '(Powerwall keeps its original price)'
+      : '(Powerwall mantiene su precio original)'
+    text(page, labelNote, 7, M + 290, sy - 48, reg, GRAY)
+
+    sy -= blockH + 6
   }
 
   // ── Bloque PROMO MES DE LAS MADRES ──

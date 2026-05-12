@@ -72,9 +72,9 @@ export default function App() {
     whCash: false,
     powerwall3: false,
   });
-  // Promoción Farmacias (descuento manual % a todo el financiamiento)
-  const [farmacias, setFarmacias] = useState<{ activa: boolean; nombre: string; porcentaje: number }>({
-    activa: false, nombre: '', porcentaje: 0,
+  // Promoción Farmacias (descuento fijo 10% SOLO sobre placas — baterías sin descuento)
+  const [farmacias, setFarmacias] = useState<{ activa: boolean; nombre: string }>({
+    activa: false, nombre: '',
   });
 
   const sistemaKWLoan = Number((inputs.panels * 410 / 1000).toFixed(2));
@@ -90,18 +90,27 @@ export default function App() {
   // El descuento se aplica al cashTotal (el valor del sistema)
   const cashTotalConPromo = Math.max(0, results.cashValue - promoAhorroTotal);
 
-  // Farmacias (mutuamente exclusiva con Mother's Day)
-  const farmaActiva = farmacias.activa && farmacias.porcentaje > 0 && farmacias.nombre.trim() !== '' && !promoActiva;
-  const farmaFactor = farmaActiva ? (1 - farmacias.porcentaje / 100) : 1;
+  // Farmacias (mutuamente exclusiva con Mother's Day) — 10% FIJO solo sobre PLACAS
+  const farmaActiva   = farmacias.activa && farmacias.nombre.trim() !== '' && !promoActiva && inputs.panels > 0;
+  const placasOrig    = results.solarValue;
+  const placasDescuento = farmaActiva ? placasOrig * 0.10 : 0;
+  const placasConPromo  = placasOrig - placasDescuento;
+
+  const cashFinalBase = promoActiva ? cashTotalConPromo : results.cashValue;
+  const cashFinal     = farmaActiva ? Math.max(0, cashFinalBase - placasDescuento) : cashFinalBase;
+
+  // Factor proporcional para reducir las mensualidades de WH y Oriental
+  // (el descuento aplica al total a financiar, que es cashTotal - pronto)
+  const totalFinanciarOrig    = Math.max(0, cashFinalBase - inputs.manualPronto);
+  const totalFinanciarConDesc = Math.max(0, cashFinal     - inputs.manualPronto);
+  const farmaFactor = (farmaActiva && totalFinanciarOrig > 0)
+    ? (totalFinanciarConDesc / totalFinanciarOrig) : 1;
   const applyFarma  = (pagos: typeof resultsWH.monthlyPayments) =>
     pagos.map(p => ({
       ...p,
       amount: p.amount * farmaFactor,
       ...(p.amountMax !== undefined ? { amountMax: p.amountMax * farmaFactor } : {}),
     }));
-
-  const cashFinalBase = promoActiva ? cashTotalConPromo : results.cashValue;
-  const cashFinal = farmaActiva ? cashFinalBase * farmaFactor : cashFinalBase;
 
   const loanResumen = {
     paneles:      inputs.panels > 0    ? `${inputs.panels} x QCells Q PEAK DUO BLK ML-G10+ 410` : 'Sin Paneles',
@@ -120,12 +129,16 @@ export default function App() {
     promoPowerwallDescuento: promoActiva ? promoPowerwallDescuento : undefined,
     promoAhorroTotal:      promoActiva ? promoAhorroTotal     : undefined,
     cashTotalOriginal:     promoActiva ? results.cashValue    : undefined,
-    // Farmacias
+    // Farmacias: 10% fijo solo sobre placas. Baterías se ven aparte sin descuento.
     farmacia: farmaActiva ? {
-      nombre:     farmacias.nombre.trim(),
-      porcentaje: farmacias.porcentaje,
-      cashOriginal:    cashFinalBase,
-      pagosWHOriginal: resultsWH.monthlyPayments,
+      nombre:           farmacias.nombre.trim(),
+      porcentaje:       10,
+      placasOriginal:   placasOrig,
+      placasDescuento:  placasDescuento,
+      placasConPromo:   placasConPromo,
+      bateriasValor:    results.batteryValue,
+      cashOriginal:     cashFinalBase,
+      pagosWHOriginal:  resultsWH.monthlyPayments,
       pagosOrientalOriginal: resultsOriental.monthlyPayments,
     } : undefined,
   };

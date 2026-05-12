@@ -43,9 +43,9 @@ interface PDFModalProps {
   onPromoMadresChange?: (v: { whCash: boolean; powerwall3: boolean }) => void
   sistemaKW?: number
   cantidadBaterias?: number
-  // Promoción Farmacias
-  farmacias?: { activa: boolean; nombre: string; porcentaje: number }
-  onFarmaciasChange?: (v: { activa: boolean; nombre: string; porcentaje: number }) => void
+  // Promoción Farmacias (10% fijo solo sobre placas)
+  farmacias?: { activa: boolean; nombre: string }
+  onFarmaciasChange?: (v: { activa: boolean; nombre: string }) => void
 }
 
 const TITULOS = {
@@ -118,10 +118,6 @@ export function PDFModal({
     if (farmacias?.activa) {
       if (!farmacias.nombre.trim()) {
         setError('Ingresa el nombre de la farmacia antes de generar el PDF.')
-        return
-      }
-      if (!farmacias.porcentaje || farmacias.porcentaje < 1) {
-        setError('Ingresa un porcentaje de descuento válido (1-50).')
         return
       }
     }
@@ -526,7 +522,8 @@ export function PDFModal({
                         {farmaOpen && (
                           <div style={{ padding: '0 12px 12px' }}>
                             <p style={{ fontSize: 11, color: '#0a6b40', marginBottom: 10, lineHeight: 1.4 }}>
-                              🩺 Descuento manual para campañas con farmacias. Se aplica a <b>todo el financiamiento</b> (Cash + WH + Oriental).
+                              🩺 Descuento fijo de <b>10%</b> sobre el valor de las <b>placas solares únicamente</b>.
+                              Las baterías Powerwall <b>no llevan descuento</b> y se muestran aparte en el PDF.
                             </p>
                             <label style={{
                               display: 'flex', alignItems: 'center', gap: 10,
@@ -544,49 +541,22 @@ export function PDFModal({
                                 }}
                                 style={{ width: 18, height: 18, accentColor: '#0F9D58' }} />
                               <span style={{ fontSize: 12, fontWeight: 700, color: farmacias.activa ? 'white' : '#066647' }}>
-                                Aplicar descuento de farmacia
+                                Aplicar 10% descuento en placas
                               </span>
                             </label>
                             {farmacias.activa && (
-                              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 8 }}>
-                                <div>
-                                  <label style={{ display: 'block', fontSize: 11, color: '#066647', marginBottom: 4, fontWeight: 700 }}>
-                                    🏥 Nombre de la farmacia *
-                                  </label>
-                                  <input type="text" value={farmacias.nombre}
-                                    onChange={e => onFarmaciasChange({ ...farmacias, nombre: e.target.value })}
-                                    placeholder="Ej: Walgreens, CVS, Caridad..." maxLength={40}
-                                    style={{
-                                      width: '100%', border: '1.5px solid #A7E5C4', borderRadius: 8,
-                                      padding: '8px 10px', fontSize: 12, outline: 'none', boxSizing: 'border-box',
-                                    }} />
-                                </div>
-                                <div>
-                                  <label style={{ display: 'block', fontSize: 11, color: '#066647', marginBottom: 4, fontWeight: 700 }}>
-                                    ⚕️ Descuento %
-                                  </label>
-                                  <input type="number" min={1} max={100} step={1}
-                                    value={farmacias.porcentaje || ''}
-                                    onChange={e => onFarmaciasChange({
-                                      ...farmacias,
-                                      porcentaje: Math.max(0, Math.min(100, parseInt(e.target.value) || 0))
-                                    })}
-                                    placeholder="15"
-                                    style={{
-                                      width: '100%', border: '1.5px solid #A7E5C4', borderRadius: 8,
-                                      padding: '8px 10px', fontSize: 13, outline: 'none', boxSizing: 'border-box',
-                                      fontWeight: 700, color: '#066647', textAlign: 'center',
-                                    }} />
-                                </div>
+                              <div>
+                                <label style={{ display: 'block', fontSize: 11, color: '#066647', marginBottom: 4, fontWeight: 700 }}>
+                                  🏥 Nombre de la farmacia *
+                                </label>
+                                <input type="text" value={farmacias.nombre}
+                                  onChange={e => onFarmaciasChange({ ...farmacias, nombre: e.target.value })}
+                                  placeholder="Ej: Walgreens, CVS, Caridad..." maxLength={40}
+                                  style={{
+                                    width: '100%', border: '1.5px solid #A7E5C4', borderRadius: 8,
+                                    padding: '8px 10px', fontSize: 12, outline: 'none', boxSizing: 'border-box',
+                                  }} />
                               </div>
-                            )}
-                            {farmacias.activa && farmacias.porcentaje > 50 && (
-                              <p style={{
-                                fontSize: 10.5, color: '#b45309', marginTop: 8,
-                                background: '#fef3c7', padding: '6px 10px', borderRadius: 6,
-                              }}>
-                                ⚠️ Descuento superior a 50%. Confirma con gerencia antes de generar.
-                              </p>
                             )}
                             {madresAct && (
                               <p style={{ fontSize: 10.5, color: '#888', marginTop: 6, fontStyle: 'italic' }}>
