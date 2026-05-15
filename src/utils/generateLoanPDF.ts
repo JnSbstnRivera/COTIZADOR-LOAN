@@ -299,16 +299,16 @@ function drawCotizacionLoan(
   // ── Bloque PROMOCION FARMACIAS (10% solo placas, baterías aparte) ──
   if (resumen.farmacia) {
     const f = resumen.farmacia
-    const blockH = 82   // compacto pero con aire arriba del título
-    rect(page, M, sy - blockH + 8, dataW, blockH, PHARM_BG)
+    const blockH = 62   // banner compacto
+    rect(page, M, sy - blockH + 6, dataW, blockH, PHARM_BG)
     page.drawRectangle({
-      x: M, y: sy - blockH + 8, width: dataW, height: blockH,
+      x: M, y: sy - blockH + 6, width: dataW, height: blockH,
       borderColor: PHARM_GREEN, borderWidth: 1.4,
     })
-    // titleY: baja el título 18pt respecto al borde superior del marco
-    const titleY = sy - 14
-    drawCross(page, M + 12, titleY + 3, 5.5, PHARM_GREEN)
-    drawCross(page, M + dataW - 18, titleY + 3, 5.5, PHARM_GREEN)
+    // titleY: aire mínimo arriba del título
+    const titleY = sy - 9
+    drawCross(page, M + 12, titleY + 3, 5, PHARM_GREEN)
+    drawCross(page, M + dataW - 18, titleY + 3, 5, PHARM_GREEN)
     const farmaTitle = resumen.idioma === 'en'
       ? `PHARMACY PROMOTION - ${f.nombre.toUpperCase()} - 10% OFF SOLAR PANELS`
       : `PROMOCION FARMACIAS - ${f.nombre.toUpperCase()} - 10% OFF EN PLACAS`
@@ -316,60 +316,60 @@ function drawCotizacionLoan(
     const farmaSub = resumen.idioma === 'en'
       ? 'Discount applies ONLY to solar panels - Batteries shown separately at full price'
       : 'Descuento aplica SOLO a placas solares - Baterias aparte sin descuento'
-    text(page, farmaSub, 6.5, M + 26, titleY - 11, reg, PHARM_DARK)
+    text(page, farmaSub, 6.5, M + 26, titleY - 9, reg, PHARM_DARK)
 
     // Resta visible: placas original - 10% = placas con promo
     const labelOrig = resumen.idioma === 'en' ? 'Solar panels (original):' : 'Placas solares (original):'
     const labelDesc = resumen.idioma === 'en' ? 'Discount 10%:'             : 'Descuento 10%:'
     const labelBat  = resumen.idioma === 'en' ? 'Batteries (no discount):'   : 'Baterias (sin descuento):'
 
-    text(page, labelOrig, 8.5, M + 26, titleY - 24, reg,  PHARM_DARK)
-    text(page, `$${fmt(f.placasOriginal)}`, 9, M + 220, titleY - 24, bold, DARK)
-    text(page, `−`,                          11, M + 290, titleY - 24, bold, PHARM_GREEN)
-    text(page, labelDesc, 8.5, M + 305, titleY - 24, reg, PHARM_DARK)
-    text(page, `$${fmt(f.placasDescuento)}`, 9, M + 380, titleY - 24, bold, PHARM_GREEN)
-    text(page, `=`,                          11, M + 445, titleY - 24, bold, PHARM_GREEN)
-    text(page, `$${fmt(f.placasConPromo)}`,  10, M + 460, titleY - 24, bold, PHARM_DARK)
+    text(page, labelOrig, 8, M + 26, titleY - 20, reg,  PHARM_DARK)
+    text(page, `$${fmt(f.placasOriginal)}`, 9, M + 220, titleY - 20, bold, DARK)
+    text(page, `−`,                          11, M + 290, titleY - 20, bold, PHARM_GREEN)
+    text(page, labelDesc, 8, M + 305, titleY - 20, reg, PHARM_DARK)
+    text(page, `$${fmt(f.placasDescuento)}`, 9, M + 380, titleY - 20, bold, PHARM_GREEN)
+    text(page, `=`,                          11, M + 445, titleY - 20, bold, PHARM_GREEN)
+    text(page, `$${fmt(f.placasConPromo)}`,  10, M + 460, titleY - 20, bold, PHARM_DARK)
 
     // Baterías aparte
-    text(page, labelBat, 8.5, M + 26, titleY - 40, reg, PHARM_DARK)
-    text(page, `$${fmt(f.bateriasValor)}`, 9, M + 220, titleY - 40, bold, DARK)
+    text(page, labelBat, 8, M + 26, titleY - 33, reg, PHARM_DARK)
+    text(page, `$${fmt(f.bateriasValor)}`, 9, M + 220, titleY - 33, bold, DARK)
     const labelNote = resumen.idioma === 'en'
       ? '(Powerwall keeps its original price)'
       : '(Powerwall mantiene su precio original)'
-    text(page, labelNote, 7, M + 290, titleY - 40, reg, GRAY)
+    text(page, labelNote, 7, M + 290, titleY - 33, reg, GRAY)
 
     sy -= blockH + 4
   }
 
   // ── Bloque PROMO MES DE LAS MADRES ──
   if (resumen.promoMadres && resumen.promoAhorroTotal && resumen.promoAhorroTotal > 0) {
-    const blockH = 76   // +14 para dar mucho aire arriba del título
+    const blockH = 54   // compacto pero con aire arriba del título
     rect(page, M, sy - blockH + 6, dataW, blockH, PINK_BG)
     page.drawRectangle({
       x: M, y: sy - blockH + 6, width: dataW, height: blockH,
       borderColor: PINK_PROMO, borderWidth: 1.4,
     })
-    // titleY: baja el título 22pt respecto al borde superior del marco
-    const titleY = sy - 20
-    drawHeart(page, M + 14, titleY + 4, 5.5, PINK_PROMO)
-    text(page, (L as any).promoTitle, 11, M + 26, titleY, bold, PINK_DARK)
-    drawHeart(page, M + dataW - 20, titleY + 4, 5.5, PINK_PROMO)
-    text(page, (L as any).promoValidity, 7, M + 26, titleY - 12, reg, PINK_DARK)
-    let py = titleY - 24
+    // titleY: aire mínimo arriba del título
+    const titleY = sy - 10
+    drawHeart(page, M + 14, titleY + 4, 5, PINK_PROMO)
+    text(page, (L as any).promoTitle, 10.5, M + 26, titleY, bold, PINK_DARK)
+    drawHeart(page, M + dataW - 20, titleY + 4, 5, PINK_PROMO)
+    text(page, (L as any).promoValidity, 7, M + 26, titleY - 10, reg, PINK_DARK)
+    let py = titleY - 22
     if (resumen.promoWHCashDescuento && resumen.promoWHCashDescuento > 0) {
       text(page, (L as any).promoWHCash, 8, M + 14,  py, bold, PINK_DARK)
       text(page, `-$${fmt(resumen.promoWHCashDescuento)}`, 9, M + 140, py, bold, PINK_PROMO)
-      py -= 11
+      py -= 10
     }
     if (resumen.promoPowerwallDescuento && resumen.promoPowerwallDescuento > 0) {
       text(page, (L as any).promoPowerwall, 8, M + 14, py, bold, PINK_DARK)
       text(page, `-$${fmt(resumen.promoPowerwallDescuento)}`, 9, M + 140, py, bold, PINK_PROMO)
-      py -= 11
+      py -= 10
     }
-    text(page, (L as any).promoTotal, 9, M + 280, titleY - 24, bold, PINK_DARK)
-    text(page, `-$${fmt(resumen.promoAhorroTotal)}`, 12, M + 360, titleY - 24, bold, PINK_PROMO)
-    sy -= blockH + 8
+    text(page, (L as any).promoTotal, 9, M + 280, titleY - 22, bold, PINK_DARK)
+    text(page, `-$${fmt(resumen.promoAhorroTotal)}`, 11, M + 360, titleY - 22, bold, PINK_PROMO)
+    sy -= blockH + 4
   }
 
   // Pronto Pago + Total a Financiar (compartido)
